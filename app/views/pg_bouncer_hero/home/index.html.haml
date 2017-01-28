@@ -1,0 +1,31 @@
+.ui.pointing.menu
+  .header.item
+    Overview
+
+.ui.grid
+  - @groups.each do |_, group|
+    .sixteen.wide.row
+      .sixteen.wide.column
+        %h3.ui.dividing.header{style: 'margin-bottom: 10px;'}= group.name
+      = render partial: "card", collection: group.databases, as: :database, locals: {partial: 'card_loading_content'}
+
+:javascript
+  document.addEventListener("DOMContentLoaded", function(event) {
+    // First
+    $("[id^='segment_href']").each(function(idx, el) {
+      $.get($(el).data('href'));
+    });
+    // Refresh every minutes
+    setInterval(function (){
+      $("[id^='segment_href']").each(function(idx, el) {
+        var el = $(el)
+        var id = el.attr('id');
+        var href = el.data('href');
+        var refreshed_id = id.replace('href', 'refreshed_span');
+        document.getElementById(refreshed_id).innerHTML = 'Refreshing...';
+        $.get(href, function(data) {
+          document.getElementById(refreshed_id).innerHTML = 'Last refresh: ' + new Date().toTimeString();
+        });
+      });
+    }, 60 * 1000)
+  });

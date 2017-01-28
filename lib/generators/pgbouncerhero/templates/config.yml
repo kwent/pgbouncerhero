@@ -1,0 +1,16 @@
+pgbouncers:
+  production:
+    master:
+      # eg. postgres://user:password@host:port/pgbouncer
+      # url: <%= ENV["PGBOUNCER_PRODUCTION_MASTER_DATABASE_URL"] %>
+    # Add more databases
+    # slave:
+    #   url: <%= ENV["PGBOUNCER_PRODUCTION_SLAVE_DATABASE_URL"] %>
+  # staging:
+  #   master:
+  #     url: <%= ENV["PGBOUNCER_STAGING_MASTER_DATABASE_URL"] %>
+  #   slave:
+  #     url: <%= ENV["PGBOUNCER_STAGING_SLAVE_DATABASE_URL"] %>
+
+# Time zone (defaults to app time zone)
+# time_zone: "Pacific Time (US & Canada)"

@@ -1,0 +1,4 @@
+.alert{class: "ui #{class_name} message"}
+  - if defined?(closable) && closable && closable == true
+    %i.close.icon
+  = message.html_safe

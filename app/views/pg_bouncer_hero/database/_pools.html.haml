@@ -1,0 +1,15 @@
+.ui.active.segment
+
+  %h4.ui.header
+    .content Pools
+
+  %table.ui.compact.table
+    %thead
+      %tr
+        - pools.first.keys.each do |key|
+          %th= key.titleize
+    %tbody
+      - pools.each do |row|
+        %tr
+          - row.each do |k,v|
+            %td= v

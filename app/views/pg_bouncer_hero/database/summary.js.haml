@@ -1,0 +1,3 @@
+$("#segment_content_#{@database.group.name.parameterize}_#{@database.name.parameterize}").replaceWith("#{j(render partial: 'pg_bouncer_hero/home/card_content', locals: {database: @database, id: "segment_content_#{@database.group.name.parameterize}_#{@database.name.parameterize}"})}")
+$("#segment_refreshed_#{@database.group.name.parameterize}_#{@database.name.parameterize}").css('display', '')
+$("#segment_content_#{@database.group.name.parameterize}_#{@database.name.parameterize} .ui.progress").each(function(idx, el) { $(el).progress({ text: {active: '{value} of {total} connections'}, autoSuccess: false }); });

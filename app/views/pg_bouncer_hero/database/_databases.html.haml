@@ -1,0 +1,15 @@
+.ui.active.segment
+
+  %h4.ui.header
+    .content Databases
+
+  %table.ui.compact.table
+    %thead
+      %tr
+        - databases.first.keys.each do |key|
+          %th= key.titleize
+    %tbody
+      - databases.each do |row|
+        %tr
+          - row.each do |k,v|
+            %td= v

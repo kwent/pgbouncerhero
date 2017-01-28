@@ -1,0 +1,5 @@
+= render partial: "menu", locals: {database: @database}
+-# = render partial: "actions", locals: {database: @database}
+
+- if @dbs
+  = render partial: "databases", locals: {database: @database, databases: @dbs}
