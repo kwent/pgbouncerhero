@@ -1,5 +1,4 @@
 require "pgbouncerhero/version"
-require "active_record"
 
 # methods
 require "pgbouncerhero/methods/basics"
