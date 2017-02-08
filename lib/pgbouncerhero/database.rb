@@ -17,7 +17,7 @@ module PgBouncerHero
     end
 
     def connection
-      connection_model.new(host, port, user, password, dbname).connection
+      @connection ||= connection_model.new(host, port, user, password, dbname).connection
     end
 
     def host
