@@ -7,6 +7,7 @@ module PgBouncerHero
       @user = user
       @password = password
       @dbname = dbname
+      @timeout = ENV["PGBOUNCERHERO_TIMEOUT"] || 5
     end
 
     def connection
@@ -18,10 +19,10 @@ module PgBouncerHero
             user: @user,
             password: @password,
             dbname: @dbname,
-            connect_timeout: 5
+            connect_timeout: @timeout
           )
-        rescue => e
-          Rails.logger.info(e)
+        rescue Exception => e
+          Rails.logger.error("[PGBouncerHero] Host:#{@host} | Database Name:#{@dbname} | Timeout: #{@timeout}s => #{e}")
           nil
         end
       end
