@@ -7,7 +7,7 @@
     .sixteen.wide.row
       .sixteen.wide.column
         %h3.ui.dividing.header{style: 'margin-bottom: 10px;'}= group.name
-      = render partial: "card", collection: group.databases, as: :database, locals: {partial: 'card_loading_content'}
+      = render partial: "card", collection: group.databases, as: :database, locals: {partial: 'card_loading_content', offline: true}
 
 :javascript
   document.addEventListener("DOMContentLoaded", function(event) {
@@ -22,10 +22,13 @@
         var id = el.attr('id');
         var href = el.data('href');
         var refreshed_id = id.replace('href', 'refreshed_span');
-        document.getElementById(refreshed_id).innerHTML = 'Refreshing...';
-        $.get(href, function(data) {
-          document.getElementById(refreshed_id).innerHTML = 'Last refresh: ' + new Date().toTimeString();
-        });
+        var refreshed_div = document.getElementById(refreshed_id);
+        if (refreshed_div) {
+          refreshed_div.innerHTML = 'Refreshing...';
+          $.get(href, function(data) {
+            refreshed_div.innerHTML = 'Last refresh: ' + new Date().toTimeString();
+          });
+        }
       });
     }, 60 * 1000)
   });

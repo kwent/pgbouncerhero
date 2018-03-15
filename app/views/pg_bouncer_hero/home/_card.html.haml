@@ -1,4 +1,4 @@
-- connected = database.connection
+- connected = !offline && database.connection
 .eight.wide.column{id: "segment_href_#{database.group.name.parameterize}_#{database.name.parameterize}", data: {href: summary_path(group: database.group.name.parameterize, database: database.name.parameterize)}}
   = link_to databases_path(group: database.group.name.parameterize, database: database.name.parameterize), style: 'text-decoration: none !important; color: inherit !important' do
     .ui.segments{style: 'margin-bottom: 10px;'}
