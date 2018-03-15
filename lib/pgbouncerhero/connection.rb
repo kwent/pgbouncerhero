@@ -21,7 +21,7 @@ module PgBouncerHero
             connect_timeout: 5
           )
         rescue => e
-          Rails.logger.info(e)
+          Rails.logger.info("[PGBouncerHero] #{@host}/#{@dbname}: #{e}")
           nil
         end
       end
