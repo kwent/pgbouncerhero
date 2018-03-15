@@ -18,7 +18,7 @@ module PgBouncerHero
             user: @user,
             password: @password,
             dbname: @dbname,
-            connect_timeout: 5
+            connect_timeout: ENV["PGBOUNCERHERO_TIMEOUT"] || 5
           )
         rescue => e
           Rails.logger.info("[PGBouncerHero] #{@host}/#{@dbname}: #{e}")
