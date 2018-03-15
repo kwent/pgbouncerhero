@@ -7,7 +7,7 @@
     .sixteen.wide.row
       .sixteen.wide.column
         %h3.ui.dividing.header{style: 'margin-bottom: 10px;'}= group.name
-      = render partial: "card", collection: group.databases, as: :database, locals: {partial: 'card_loading_content', offline: true}
+      = render partial: "card", collection: group.databases, as: :database, locals: {partial: 'card_loading_content', lazy: true}
 
 :javascript
   document.addEventListener("DOMContentLoaded", function(event) {
