@@ -2,12 +2,14 @@ module PgBouncerHero
   module Methods
     module Basics
       def summary
-        l = lists
-        d = databases
-        l = l.as_json
-        d = d.as_json.reject { |a| a['name'] == 'pgbouncer' }
-        l.push({databases_details: d})
-        l
+        if connection
+          l = lists
+          d = databases
+          l = l.as_json
+          d = d.as_json.reject { |a| a['name'] == 'pgbouncer' }
+          l.push({databases_details: d})
+          l
+        end
       end
       def databases
         connection.exec("SHOW databases")
