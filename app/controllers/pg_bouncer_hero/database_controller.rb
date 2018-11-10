@@ -1,3 +1,5 @@
+require_dependency 'pg_bouncer_hero/application_controller'
+
 module PgBouncerHero
   class DatabaseController < ApplicationController
     def summary
