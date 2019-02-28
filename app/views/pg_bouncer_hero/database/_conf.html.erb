@@ -1,0 +1,27 @@
+<div class="ui active segment">
+  <h4 class="ui header">
+    <div class="content">Confs</div>
+  </h4>
+  <table class="ui compact table">
+    <thead>
+      <tr>
+        <% conf.first.keys.each do |key| %>
+          <th>
+            <%= key.titleize %>
+          </th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% conf.each do |row| %>
+        <tr>
+          <% row.each do |k,v| %>
+            <td>
+              <%= v %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

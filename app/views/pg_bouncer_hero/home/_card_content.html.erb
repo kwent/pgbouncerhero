@@ -1,0 +1,43 @@
+<% connected = database.connection %>
+<% if connected %>
+  <div class="ui horizontal segments" id="<%= id %>" style="background-color: white !important;">
+    <div class="ui segment">
+      <% summary = database.summary %>
+      <div>
+        <i class="users icon"></i>
+        <% number = summary.select { |row| row['list'] == 'users' }.first['items'] %>
+        <%= pluralize(number, 'user') %>
+      </div>
+      <div>
+        <i class="database icon"></i>
+        <% number = summary.select { |row| row['list'] == 'databases' }.first['items'].to_i - 1 %>
+        <%= pluralize(number, 'database') %>
+      </div>
+      <div>
+        <i class="plug icon"></i>
+        <% number = summary.select { |row| row['list'] == 'pools' }.first['items'].to_i - 1 %>
+        <%= pluralize(number, 'pool') %>
+      </div>
+    </div>
+    <div class="ui segment">
+      <ul style="margin: 0; padding-left: 5px;">
+        <% summary.select{ |row| row.key?(:databases_details) }.first[:databases_details].each do |db| %>
+          <li style="margin: 0; list-style-type: none;">
+            <span>
+              <i class="database icon"></i>
+              <strong>
+                <%= db['name'] %>
+              </strong>
+              <div class="ui progress small success" style="float:right; width: 150px; margin-top:4px;" data-value="<%= db['current_connections'] %>" data-total="<%= db['max_connections'] %>">
+                <div class="bar">
+                  <div class="progress"></div>
+                </div>
+                <div class="label">Connections</div>
+              </div>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>

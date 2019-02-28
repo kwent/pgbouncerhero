@@ -1,0 +1,3 @@
+<% flash.each do |type, message| %>
+  <%= render partial: 'shared/alert', locals: {class_name: alert_class_for(type), message: message} %>
+<% end %>

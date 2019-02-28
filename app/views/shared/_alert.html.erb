@@ -1,0 +1,6 @@
+<div class="ui <%= class_name %> message alert">
+  <% if defined?(closable) && closable && closable == true %>
+    <i class="close icon"></i>
+  <% end %>
+  <%= message.html_safe %>
+</div>

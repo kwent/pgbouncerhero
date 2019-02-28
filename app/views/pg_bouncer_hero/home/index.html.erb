@@ -1,15 +1,22 @@
-.ui.pointing.menu
-  .header.item
+<div class="ui pointing menu">
+  <div class="header item">
     Overview
+  </div>
+</div>
+<div class="ui grid">
+  <% @groups.each do |_, group| %>
+    <div class="sixteen wide row">
+      <div class="sixteen wide column">
+        <h3 class="ui dividing header" style="margin-bottom: 10px;">
+          <%= group.name %>
+        </h3>
+      </div>
+      <%= render partial: "card", collection: group.databases, as: :database, locals: {partial: 'card_loading_content', lazy: true} %>
+    </div>
+  <% end %>
+</div>
+<script>
 
-.ui.grid
-  - @groups.each do |_, group|
-    .sixteen.wide.row
-      .sixteen.wide.column
-        %h3.ui.dividing.header{style: 'margin-bottom: 10px;'}= group.name
-      = render partial: "card", collection: group.databases, as: :database, locals: {partial: 'card_loading_content', lazy: true}
-
-:javascript
   document.addEventListener("DOMContentLoaded", function(event) {
     // First
     $("[id^='segment_href']").each(function(idx, el) {
@@ -32,3 +39,6 @@
       });
     }, 60 * 1000)
   });
+
+
+</script>

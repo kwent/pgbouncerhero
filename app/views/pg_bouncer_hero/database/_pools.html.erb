@@ -1,0 +1,27 @@
+<div class="ui active segment">
+  <h4 class="ui header">
+    <div class="content">Pools</div>
+  </h4>
+  <table class="ui compact table">
+    <thead>
+      <tr>
+        <% pools.first.keys.each do |key| %>
+          <th>
+            <%= key.titleize %>
+          </th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% pools.each do |row| %>
+        <tr>
+          <% row.each do |k,v| %>
+            <td>
+              <%= v %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

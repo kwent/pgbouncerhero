@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest"
   spec.add_runtime_dependency "sass-rails"
   spec.add_runtime_dependency "semantic-ui-sass"
-  spec.add_runtime_dependency "haml-rails"
 
   if RUBY_PLATFORM == "java"
     spec.add_runtime_dependency "pg_jruby"

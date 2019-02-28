@@ -1,0 +1,21 @@
+<div class="ui pointing menu">
+  <div class="header item">
+    <%= "#{database.group.name} > #{database.name}" %>
+  </div>
+  <%= link_to "Databases", databases_path(database: database.name.parameterize), class: "item #{is_active('databases')}" %>
+  <%= link_to "Stats", stats_path(database: database.name.parameterize), class: "item #{is_active('stats')}" %>
+  <%= link_to "Pools", pools_path(database: database.name.parameterize), class: "item #{is_active('pools')}" %>
+  <%= link_to "Clients", clients_path(database: database.name.parameterize), class: "item #{is_active('clients')}" %>
+  <%= link_to "Configuration", conf_path(database: database.name.parameterize), class: "item #{is_active('conf')}" %>
+  <div class="right menu">
+    <div class="item">
+      <%= link_to 'Reload', reload_path(database: database.name.parameterize), remote: :true, method: :post, class: 'ui button basic positive button', data: { confirm: 'Are you sure?' } %>
+    </div>
+    <div class="item">
+      <%= link_to 'Suspend', suspend_path(database: database.name.parameterize), remote: :true, method: :post, class: 'ui button basic primary button', data: { confirm: 'Are you sure?' } %>
+    </div>
+    <div class="item">
+      <%= link_to 'Shutdown', shutdown_path(database: database.name.parameterize), remote: :true, method: :post, class: 'ui button basic negative button', data: { confirm: 'Are you sure?' } %>
+    </div>
+  </div>
+</div>

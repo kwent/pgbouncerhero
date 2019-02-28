@@ -19,7 +19,6 @@ gem 'pgbouncerhero'
 gem 'jquery-rails'
 gem 'sass-rails'
 gem 'semantic-ui-sass'
-gem 'haml-rails'
 gem 'pg'
 ```
 

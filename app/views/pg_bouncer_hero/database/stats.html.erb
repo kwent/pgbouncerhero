@@ -1,0 +1,4 @@
+<%= render partial: "menu", locals: {database: @database} %>
+<% if @stats %>
+  <%= render partial: "stats", locals: {database: @database, stats: @stats} %>
+<% end %>

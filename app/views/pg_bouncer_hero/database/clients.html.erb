@@ -1,0 +1,4 @@
+<%= render partial: "menu", locals: {database: @database} %>
+<% if @clients %>
+  <%= render partial: "clients", locals: {database: @database, clients: @clients} %>
+<% end %>
