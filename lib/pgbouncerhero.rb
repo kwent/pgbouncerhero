@@ -9,6 +9,8 @@ require "pgbouncerhero/engine" if defined?(Rails)
 # models
 require "pgbouncerhero/connection"
 
+require "semantic-ui-sass"
+
 module PgBouncerHero
   # settings
   class << self
