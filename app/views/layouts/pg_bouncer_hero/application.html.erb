@@ -7,7 +7,8 @@
     <title>
       <%= [@groups.size > 1 ? "#{@database.group.name} | #{@database.name}" : "PgBouncerHero", @title].compact.join(" / ") %>
     </title>
-    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': true %>
+    <%= stylesheet_link_tag 'pgbouncerhero/application', media: 'all', 'data-turbolinks-track': true %>
+    <%= javascript_include_tag "pgbouncerhero/application" %>
     <%= csrf_meta_tags %>
   </head>
   <body>
@@ -23,7 +24,6 @@
         </div>
         <%= yield %>
       </div>
-      <%= javascript_include_tag 'application' %>
       <% if content_for? :inline_script %>
         <%= yield :inline_script %>
       <% end %>

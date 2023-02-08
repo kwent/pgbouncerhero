@@ -16,30 +16,12 @@ Add those dependencies to your application’s Gemfile:
 
 ```ruby
 gem 'pgbouncerhero'
-gem 'jquery-rails'
-gem 'sass-rails'
-gem 'semantic-ui-sass'
-gem 'pg'
 ```
 
 And mount the engine in your `config/routes.rb`:
 
 ```ruby
 mount PgBouncerHero::Engine, at: "pgbouncerhero"
-```
-
-Add the following line in your `application.css`:
-
-```
-*= require pgbouncerhero/application
-```
-
-Add the following lines in your `application.js`:
-
-```
-//= require jquery
-//= require jquery_ujs
-//= require pgbouncerhero/application
 ```
 
 ### Basic Authentication
@@ -97,7 +79,7 @@ production:
 # License
 
 ```plain
-Copyright (c) 2017 Quentin Rousseau <contact@quent.in>
+Copyright (c) 2022 Quentin Rousseau <contact@quent.in>
 
 MIT License
 
