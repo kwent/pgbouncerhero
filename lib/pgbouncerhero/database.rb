@@ -7,7 +7,7 @@ module PgBouncerHero
     def initialize(group, id, config)
       @id = id
       @config = config || {}
-      @url = URI.parse(config["url"])
+      @url = URI.parse(config["url"].to_s)
       @group = group
     end
 

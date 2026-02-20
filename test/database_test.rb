@@ -32,4 +32,24 @@ class DatabaseTest < Minitest::Test
   def test_database_dbname
     assert_equal "pgbouncer", @database.dbname
   end
+
+  def test_database_with_nil_url
+    config = { "test_group" => { "primary" => {} } }
+    group = PgBouncerHero::Group.new("test_group", config)
+    database = group.databases.first
+
+    assert_nil database.host
+    assert_nil database.port
+    assert_nil database.connection
+  end
+
+  def test_database_with_empty_url
+    config = { "test_group" => { "primary" => { "url" => "" } } }
+    group = PgBouncerHero::Group.new("test_group", config)
+    database = group.databases.first
+
+    assert_nil database.host
+    assert_nil database.port
+    assert_nil database.connection
+  end
 end
