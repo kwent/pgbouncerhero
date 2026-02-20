@@ -2,15 +2,11 @@ module PgBouncerHero
   class ApplicationController < ActionController::Base
     layout "pg_bouncer_hero/application"
 
-    protect_from_forgery
+    protect_from_forgery with: :exception
 
     http_basic_authenticate_with name: ENV["PGBOUNCERHERO_USERNAME"], password: ENV["PGBOUNCERHERO_PASSWORD"] if ENV["PGBOUNCERHERO_PASSWORD"]
 
-    if respond_to?(:before_action)
-      before_action :set_database
-    else
-      before_filter :set_database
-    end
+    before_action :set_database
 
     protected
 

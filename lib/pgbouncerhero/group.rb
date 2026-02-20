@@ -2,7 +2,6 @@ require "pgbouncerhero/database"
 
 module PgBouncerHero
   class Group
-
     attr_reader :id, :config, :databases
 
     def initialize(id, config)
@@ -16,6 +15,5 @@ module PgBouncerHero
     def name
       @name ||= id.to_s
     end
-
   end
 end

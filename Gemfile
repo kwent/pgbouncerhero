@@ -1,4 +1,6 @@
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in pgbouncerhero.gemspec
 gemspec
+
+gem "propshaft"
+gem "puma"

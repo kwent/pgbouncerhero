@@ -1,27 +1,25 @@
-<div class="ui active segment">
-  <h4 class="ui header">
-    <div class="content">Pools</div>
-  </h4>
-  <table class="ui compact table">
-    <thead>
-      <tr>
-        <% pools.first.keys.each do |key| %>
-          <th>
-            <%= key.titleize %>
-          </th>
-        <% end %>
-      </tr>
-    </thead>
-    <tbody>
-      <% pools.each do |row| %>
+<div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+  <div class="px-4 py-3 border-b border-gray-200">
+    <h4 class="text-base font-semibold text-gray-900">Pools</h4>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
         <tr>
-          <% row.each do |k,v| %>
-            <td>
-              <%= v %>
-            </td>
+          <% pools.first.keys.each do |key| %>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= key.titleize %></th>
           <% end %>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% pools.each do |row| %>
+          <tr class="hover:bg-gray-50">
+            <% row.each do |_k, v| %>
+              <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"><%= v %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

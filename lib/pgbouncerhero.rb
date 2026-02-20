@@ -1,28 +1,26 @@
 require "pgbouncerhero/version"
 
-# methods
 require "pgbouncerhero/methods/basics"
 
 require "pgbouncerhero/group"
 require "pgbouncerhero/engine" if defined?(Rails)
 
-# models
 require "pgbouncerhero/connection"
 
-# others
-require "jquery-rails"
-require "semantic-ui-sass"
+require "pg"
+require "importmap-rails"
+require "turbo-rails"
+require "stimulus-rails"
 
 module PgBouncerHero
-  # settings
+  mattr_accessor :importmap, default: Importmap::Map.new
+
   class << self
     attr_accessor :env
   end
   self.env = ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development"
 
   class << self
-    extend Forwardable
-
     def time_zone=(time_zone)
       @time_zone = time_zone.is_a?(ActiveSupport::TimeZone) ? time_zone : ActiveSupport::TimeZone[time_zone.to_s]
     end
@@ -32,15 +30,15 @@ module PgBouncerHero
     end
 
     def config
-      Thread.current[:PgBouncerHero_config] ||= begin
+      @config ||= begin
         path = "config/pgbouncerhero.yml"
 
-        config = YAML.load(ERB.new(File.read(path)).result) if File.exist?(path)
+        config = YAML.safe_load(ERB.new(File.read(path)).result, aliases: true) if File.exist?(path)
         config ||= {}
 
         if config[env]
           config[env]
-        elsif config["pgbouncers"] # preferred format
+        elsif config["pgbouncers"]
           config
         else
           {
@@ -58,8 +56,8 @@ module PgBouncerHero
 
     def groups
       @groups ||= begin
-        mapped = config['pgbouncers'].map do |group_id, hash|
-          [group_id.parameterize, PgBouncerHero::Group.new(group_id, config['pgbouncers'])]
+        mapped = config["pgbouncers"].map do |group_id, _hash|
+          [ group_id.parameterize, PgBouncerHero::Group.new(group_id, config["pgbouncers"]) ]
         end
         Hash[mapped]
       end

@@ -1,6 +1,5 @@
 module PgBouncerHero
   class Database
-
     include Methods::Basics
 
     attr_reader :id, :config, :group
@@ -8,7 +7,7 @@ module PgBouncerHero
     def initialize(group, id, config)
       @id = id
       @config = config || {}
-      @url = URI.parse(config["url"])
+      @url = URI.parse(config["url"].to_s)
       @group = group
     end
 

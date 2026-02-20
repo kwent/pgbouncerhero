@@ -1,5 +1,3 @@
-require_dependency 'pg_bouncer_hero/application_controller'
-
 module PgBouncerHero
   class DatabaseController < ApplicationController
     def summary
@@ -9,6 +7,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def databases
       if @database.connection
         @dbs = @database.databases
@@ -16,6 +15,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def stats
       if @database.connection
         @stats = @database.stats
@@ -23,6 +23,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def pools
       if @database.connection
         @pools = @database.pools
@@ -30,6 +31,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def clients
       if @database.connection
         @clients = @database.clients
@@ -37,6 +39,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def conf
       if @database.connection
         @conf = @database.conf
@@ -44,29 +47,32 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def reload
-      if @database.connection
-        @database.reload
-        flash[:success] = "#{@database.name} has been reloaded."
-      else
-        flash[:error] = "#{@database.name} does not look online."
-      end
+      execute_admin_command(:reload, "reloaded")
     end
+
     def suspend
-      if @database.connection
-        @database.suspend
-        flash[:success] = "#{@database.name} has been suspended."
-      else
-        flash[:error] = "#{@database.name} does not look online."
-      end
+      execute_admin_command(:suspend, "suspended")
     end
+
     def shutdown
+      execute_admin_command(:shutdown, "shut down")
+    end
+
+    private
+
+    def execute_admin_command(command, past_tense)
       if @database.connection
-        @database.shutdown
-        flash[:success] = "#{@database.name} has been shutdown."
+        @database.public_send(command)
+        flash[:success] = "#{@database.name} has been #{past_tense}."
       else
         flash[:error] = "#{@database.name} does not look online."
       end
+    rescue PG::Error => e
+      flash[:error] = "#{@database.name}: #{e.message.strip}"
+    ensure
+      redirect_back fallback_location: root_path
     end
   end
 end

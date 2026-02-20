@@ -1,0 +1,8 @@
+linter:
+  enabled: true
+  failLevel: error
+
+formatter:
+  enabled: true
+  indentWidth: 2
+  maxLineLength: 120

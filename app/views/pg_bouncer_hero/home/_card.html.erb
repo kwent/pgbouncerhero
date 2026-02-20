@@ -1,26 +1,13 @@
-<div class="eight wide column" id="segment_href_<%= database.group.name.parameterize %>_<%= database.name.parameterize %>" data-href="<%= summary_path(group: database.group.name.parameterize, database: database.name.parameterize) %>">
-  <%= link_to databases_path(group: database.group.name.parameterize, database: database.name.parameterize), style: 'text-decoration: none !important; color: inherit !important' do %>
-    <div class="ui segments" style="margin-bottom: 10px;">
-      <div class="ui segment" style="height: 60px;">
-        <div style="float: left;">
-          <div style="font-size: 16px; font-weight: bold;">
-            <%= database.name %>
-          </div>
-          <div style="font-size: 12px; color: grey">
-            <%= database.host %>
-          </div>
-        </div>
-        <button class="grey ui button basic button" id="segment_status_<%= database.group.name.parameterize %>_<%= database.name.parameterize %>" style="float: right;">
-          <%= 'N/A' %>
-        </button>
-      </div>
-      <%= render partial: partial, locals: {database: database, id: "segment_content_#{database.group.name.parameterize}_#{database.name.parameterize}"} %>
-      <div class="ui segment" id="segment_refreshed_<%= database.group.name.parameterize %>_<%= database.name.parameterize %>" style="height: 35px; display: none;">
-        <span class="right floated" id="segment_refreshed_span_<%= database.group.name.parameterize %>_<%= database.name.parameterize %>" style="float:right; margin-top: -6px; color: grey">
-          Last refresh:
-          <%= Time.now.strftime("%H:%M:%S GMT%z (%Z)") %>
-        </span>
+<div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+  <%= link_to databases_path(group: database.group.name.parameterize, database: database.name.parameterize), class: "block no-underline text-inherit" do %>
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+      <div>
+        <div class="text-base font-bold text-gray-900"><%= database.name %></div>
+        <div class="text-xs text-gray-500"><%= database.host %></div>
       </div>
     </div>
   <% end %>
+  <turbo-frame id="card_<%= database.group.name.parameterize %>_<%= database.name.parameterize %>" src="<%= summary_path(group: database.group.name.parameterize, database: database.name.parameterize) %>" loading="lazy">
+    <%= render partial: "card_loading_content" %>
+  </turbo-frame>
 </div>

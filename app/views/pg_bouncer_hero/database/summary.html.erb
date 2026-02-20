@@ -1,0 +1,3 @@
+<turbo-frame id="card_<%= @database.group.name.parameterize %>_<%= @database.name.parameterize %>">
+  <%= render partial: "pg_bouncer_hero/home/card_content", locals: { database: @database } %>
+</turbo-frame>

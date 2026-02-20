@@ -6,8 +6,8 @@ module PgBouncerHero
           l = lists
           d = databases
           l = l.as_json
-          d = d.as_json.reject { |a| a['name'] == 'pgbouncer' }
-          l.push({databases_details: d})
+          d = d.as_json.reject { |a| a["name"] == "pgbouncer" }
+          l.push({ databases_details: d })
           l
         end
       end
