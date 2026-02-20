@@ -26,10 +26,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "importmap-rails", ">= 1.2"
   spec.add_dependency "turbo-rails", ">= 1.0"
   spec.add_dependency "stimulus-rails", ">= 1.0"
-  spec.add_dependency "tailwindcss-rails", ">= 4.0"
   spec.add_dependency "pg", ">= 1.2"
 
   spec.add_development_dependency "rake", "~> 13.0"
+  spec.add_development_dependency "tailwindcss-rails", "~> 4.0"
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "appraisal", "~> 2.5"
   spec.add_development_dependency "rubocop", "~> 1.0"

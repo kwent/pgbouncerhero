@@ -7,6 +7,7 @@ require "pgbouncerhero/engine" if defined?(Rails)
 
 require "pgbouncerhero/connection"
 
+require "pg"
 require "importmap-rails"
 require "turbo-rails"
 require "stimulus-rails"

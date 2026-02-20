@@ -6,7 +6,6 @@ PATH
       pg (>= 1.2)
       railties (>= 7.2)
       stimulus-rails (>= 1.0)
-      tailwindcss-rails (>= 4.0)
       turbo-rails (>= 1.0)
 
 GEM
@@ -238,6 +237,7 @@ DEPENDENCIES
   rake (~> 13.0)
   rubocop (~> 1.0)
   rubocop-rails-omakase (~> 1.0)
+  tailwindcss-rails (~> 4.0)
 
 CHECKSUMS
   actionpack (8.1.2) sha256=ced74147a1f0daafaa4bab7f677513fd4d3add574c7839958f7b4f1de44f8423

@@ -6,6 +6,7 @@
     <title>
       <%= [@groups.size > 1 ? "#{@database.group.name} | #{@database.name}" : "PgBouncerHero", @title].compact.join(" / ") %>
     </title>
+    <link rel="icon" href="data:,">
     <%= stylesheet_link_tag "pgbouncerhero/application" %>
     <%= javascript_importmap_tags("pgbouncerhero/application", importmap: PgBouncerHero.importmap) %>
     <%= csrf_meta_tags %>

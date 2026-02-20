@@ -10,6 +10,13 @@ end
 
 RuboCop::RakeTask.new
 
+namespace :tailwindcss do
+  desc "Build Tailwind CSS"
+  task :build do
+    sh "bundle exec tailwindcss -i app/assets/stylesheets/pgbouncerhero/application.css -o app/assets/builds/pgbouncerhero/application.css --minify"
+  end
+end
+
 namespace :herb do
   desc "Lint ERB templates with Herb"
   task :lint do

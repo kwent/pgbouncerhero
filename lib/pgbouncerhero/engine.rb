@@ -3,7 +3,7 @@ module PgBouncerHero
     isolate_namespace PgBouncerHero
 
     initializer "pgbouncerhero.assets" do |app|
-      app.config.assets.paths << root.join("app/assets/stylesheets")
+      app.config.assets.paths << root.join("app/assets/builds")
       app.config.assets.paths << root.join("app/javascript")
     end
 

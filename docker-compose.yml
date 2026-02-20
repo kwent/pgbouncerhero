@@ -18,6 +18,6 @@ services:
       MAX_CLIENT_CONN: 100
       DEFAULT_POOL_SIZE: 20
     ports:
-      - "6432:6432"
+      - "6432:5432"
     depends_on:
       - postgres
