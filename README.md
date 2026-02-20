@@ -1,21 +1,28 @@
 # PgBouncerHero
 
-A graphical user interface for your PGBouncers.
+[![Gem Version](https://badge.fury.io/rb/pgbouncerhero.svg)](https://badge.fury.io/rb/pgbouncerhero)
+[![CI](https://github.com/kwent/pgbouncerhero/actions/workflows/test.yml/badge.svg)](https://github.com/kwent/pgbouncerhero/actions/workflows/test.yml)
+[![Ruby](https://img.shields.io/badge/ruby-%3E%3D%203.2-ruby.svg)](https://www.ruby-lang.org)
 
-[See it in action](https://pgbouncerhero-demo.herokuapp.com/). [Source Code](https://github.com/kwent/pgbouncerhero-demo).
+A graphical user interface for your PgBouncers.
 
-[![Screenshot1](https://github.com/kwent/pgbouncerhero/blob/master/doc/screenshot-1.png?raw=true)](https://pgbouncerhero-demo.herokuapp.com/)
-[![Screenshot2](https://github.com/kwent/pgbouncerhero/blob/master/doc/screenshot-2.png?raw=true)](https://pgbouncerhero-demo.herokuapp.com/)
-[![Screenshot2](https://github.com/kwent/pgbouncerhero/blob/master/doc/screenshot-3.png?raw=true)](https://pgbouncerhero-demo.herokuapp.com/)
+[![Screenshot1](https://github.com/kwent/pgbouncerhero/blob/master/doc/screenshot-1.png?raw=true)](https://github.com/kwent/pgbouncerhero)
+[![Screenshot2](https://github.com/kwent/pgbouncerhero/blob/master/doc/screenshot-2.png?raw=true)](https://github.com/kwent/pgbouncerhero)
+[![Screenshot3](https://github.com/kwent/pgbouncerhero/blob/master/doc/screenshot-3.png?raw=true)](https://github.com/kwent/pgbouncerhero)
+
+## Requirements
+
+- Ruby >= 3.2
+- Rails >= 7.2
+- Propshaft (asset pipeline)
+- importmap-rails
 
 ## Installation
 
-PgBouncerHero is available as a Rails engine.
-
-Add those dependencies to your application’s Gemfile:
+Add to your application's Gemfile:
 
 ```ruby
-gem 'pgbouncerhero'
+gem "pgbouncerhero"
 ```
 
 And mount the engine in your `config/routes.rb`:
@@ -36,7 +43,7 @@ ENV["PGBOUNCERHERO_PASSWORD"] = "triforce"
 ### Devise
 
 ```ruby
-authenticate :user, -> (user) { user.admin? } do
+authenticate :user, ->(user) { user.admin? } do
   mount PgBouncerHero::Engine, at: "pgbouncerhero"
 end
 ```
@@ -49,58 +56,42 @@ export PGBOUNCERHERO_DATABASE_URL=postgres://user:password@host:port/pgbouncer
 
 ## Multiple PgBouncers
 
-Create `config/pgbouncerhero.yml` with:
+Generate a config file:
 
-```yml
-default: &default
-  pgbouncers:
-    production:
-      master:
-        url: <%= ENV["PGBOUNCER_PRODUCTION_MASTER_DATABASE_URL"] %>
-      slave:
-        url: <%= ENV["PGBOUNCER_PRODUCTION_SLAVE_DATABASE_URL"] %>
-    staging:
-      master:
-        url: <%= ENV["PGBOUNCER_STAGING_MASTER_DATABASE_URL"] %>
-      slave:
-        url: <%= ENV["PGBOUNCER_STAGING_SLAVE_DATABASE_URL"] %>
-
-development:
-  <<: *default
-
-production:
-  <<: *default
+```bash
+rails generate pgbouncerhero:config
 ```
 
-# Authors
+Or create `config/pgbouncerhero.yml` manually:
+
+```yml
+pgbouncers:
+  production:
+    primary:
+      url: <%= ENV["PGBOUNCER_PRODUCTION_PRIMARY_DATABASE_URL"] %>
+    replica:
+      url: <%= ENV["PGBOUNCER_PRODUCTION_REPLICA_DATABASE_URL"] %>
+  staging:
+    primary:
+      url: <%= ENV["PGBOUNCER_STAGING_PRIMARY_DATABASE_URL"] %>
+    replica:
+      url: <%= ENV["PGBOUNCER_STAGING_REPLICA_DATABASE_URL"] %>
+```
+
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am "Add some feature"`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
+
+## Authors
 
 - [Quentin Rousseau](https://github.com/kwent)
 
-# License
+## License
 
-```plain
-Copyright (c) 2022 Quentin Rousseau <contact@quent.in>
+Copyright (c) 2025 Quentin Rousseau
 
-MIT License
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-```
+MIT License. See [LICENSE.txt](LICENSE.txt) for details.

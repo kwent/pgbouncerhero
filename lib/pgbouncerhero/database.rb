@@ -1,6 +1,5 @@
 module PgBouncerHero
   class Database
-
     include Methods::Basics
 
     attr_reader :id, :config, :group

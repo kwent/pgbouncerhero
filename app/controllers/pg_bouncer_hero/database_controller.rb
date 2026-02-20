@@ -1,5 +1,3 @@
-require_dependency 'pg_bouncer_hero/application_controller'
-
 module PgBouncerHero
   class DatabaseController < ApplicationController
     def summary
@@ -9,6 +7,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def databases
       if @database.connection
         @dbs = @database.databases
@@ -16,6 +15,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def stats
       if @database.connection
         @stats = @database.stats
@@ -23,6 +23,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def pools
       if @database.connection
         @pools = @database.pools
@@ -30,6 +31,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def clients
       if @database.connection
         @clients = @database.clients
@@ -37,6 +39,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def conf
       if @database.connection
         @conf = @database.conf
@@ -44,6 +47,7 @@ module PgBouncerHero
         flash[:error] = "#{@database.name} does not look online."
       end
     end
+
     def reload
       if @database.connection
         @database.reload
@@ -51,7 +55,9 @@ module PgBouncerHero
       else
         flash[:error] = "#{@database.name} does not look online."
       end
+      redirect_back fallback_location: root_path
     end
+
     def suspend
       if @database.connection
         @database.suspend
@@ -59,7 +65,9 @@ module PgBouncerHero
       else
         flash[:error] = "#{@database.name} does not look online."
       end
+      redirect_back fallback_location: root_path
     end
+
     def shutdown
       if @database.connection
         @database.shutdown
@@ -67,6 +75,7 @@ module PgBouncerHero
       else
         flash[:error] = "#{@database.name} does not look online."
       end
+      redirect_back fallback_location: root_path
     end
   end
 end

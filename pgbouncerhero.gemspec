@@ -1,32 +1,38 @@
-# coding: utf-8
-lib = File.expand_path("../lib", __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "pgbouncerhero/version"
+require_relative "lib/pgbouncerhero/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "pgbouncerhero"
   spec.version       = PgBouncerHero::VERSION
-  spec.authors       = ["Quentin Rousseau"]
-  spec.email         = ["contact@quent.in"]
-  spec.summary       = "A graphical user interface for your PGBouncers"
-  spec.description   = "A graphical user interface for your PGBouncers"
+  spec.authors       = [ "Quentin Rousseau" ]
+  spec.email         = [ "contact@quent.in" ]
+  spec.summary       = "A graphical user interface for your PgBouncers"
+  spec.description   = "A Rails engine providing a web dashboard for monitoring and managing one or multiple PgBouncer connection poolers."
   spec.homepage      = "https://github.com/kwent/pgbouncerhero"
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0")
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.require_paths = ["lib"]
+  spec.required_ruby_version = ">= 3.2"
 
-  spec.add_development_dependency "bundler", "~> 1.6"
-  spec.add_development_dependency "rake"
-  spec.add_development_dependency "minitest"
-  spec.add_runtime_dependency "sass-rails"
-  spec.add_runtime_dependency "jquery-rails"
-  spec.add_runtime_dependency "semantic-ui-sass"
+  spec.files         = Dir["lib/**/*", "app/**/*", "config/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md"]
+  spec.require_paths = [ "lib" ]
 
-  if RUBY_PLATFORM == "java"
-    spec.add_runtime_dependency "pg_jruby"
-  else
-    spec.add_runtime_dependency "pg"
-  end
+  spec.metadata = {
+    "source_code_uri" => "https://github.com/kwent/pgbouncerhero",
+    "changelog_uri" => "https://github.com/kwent/pgbouncerhero/blob/master/CHANGELOG.md",
+    "bug_tracker_uri" => "https://github.com/kwent/pgbouncerhero/issues",
+    "rubygems_mfa_required" => "true"
+  }
+
+  spec.add_dependency "railties", ">= 7.2"
+  spec.add_dependency "importmap-rails", ">= 1.2"
+  spec.add_dependency "turbo-rails", ">= 1.0"
+  spec.add_dependency "stimulus-rails", ">= 1.0"
+  spec.add_dependency "tailwindcss-rails", ">= 4.0"
+  spec.add_dependency "pg", ">= 1.2"
+
+  spec.add_development_dependency "rake", "~> 13.0"
+  spec.add_development_dependency "minitest", "~> 5.0"
+  spec.add_development_dependency "appraisal", "~> 2.5"
+  spec.add_development_dependency "rubocop", "~> 1.0"
+  spec.add_development_dependency "rubocop-rails-omakase", "~> 1.0"
+  spec.add_development_dependency "herb", "~> 0.8"
 end

@@ -1,44 +1,20 @@
-<div class="ui pointing menu">
-  <div class="header item">
-    Overview
+<div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+  <div class="px-4 py-3 border-b border-gray-200">
+    <h2 class="text-lg font-semibold text-gray-900">Overview</h2>
   </div>
 </div>
-<div class="ui grid">
+
+<div data-controller="polling" data-polling-interval-value="60000">
   <% @groups.each do |_, group| %>
-    <div class="sixteen wide row">
-      <div class="sixteen wide column">
-        <h3 class="ui dividing header" style="margin-bottom: 10px;">
-          <%= group.name %>
-        </h3>
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+        <%= group.name %>
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <% group.databases.each do |database| %>
+          <%= render partial: "card", locals: { database: database } %>
+        <% end %>
       </div>
-      <%= render partial: "card", collection: group.databases, as: :database, locals: {partial: 'card_loading_content', lazy: true} %>
     </div>
   <% end %>
 </div>
-<script>
-
-  document.addEventListener("DOMContentLoaded", function(event) {
-    // First
-    $("[id^='segment_href']").each(function(idx, el) {
-      $.get($(el).data('href'));
-    });
-    // Refresh every minutes
-    setInterval(function (){
-      $("[id^='segment_href']").each(function(idx, el) {
-        var el = $(el)
-        var id = el.attr('id');
-        var href = el.data('href');
-        var refreshed_id = id.replace('href', 'refreshed_span');
-        var refreshed_div = document.getElementById(refreshed_id);
-        if (refreshed_div) {
-          refreshed_div.innerHTML = 'Refreshing...';
-          $.get(href, function(data) {
-            refreshed_div.innerHTML = 'Last refresh: ' + new Date().toTimeString();
-          });
-        }
-      });
-    }, 60 * 1000)
-  });
-
-
-</script>

@@ -3,7 +3,6 @@
 .bundle
 .config
 .yardoc
-*.lock
 InstalledFiles
 _yardoc
 coverage
@@ -16,4 +15,4 @@ tmp
 *.o
 *.a
 mkmf.log
-.ruby-version
+gemfiles/*.lock

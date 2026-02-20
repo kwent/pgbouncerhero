@@ -1,7 +1,7 @@
 PgBouncerHero::Engine.routes.draw do
   root to: "home#index"
-  scope path: ":group", constraints: proc { |req| (PgBouncerHero.groups.keys.map(&:parameterize) + [nil]).include?(req.params[:group]) } do
-    scope path: ":database", constraints: proc { |req| (PgBouncerHero.groups[req.params[:group]].databases.map(&:name).map(&:parameterize) + [nil]).include?(req.params[:database]) } do
+  scope path: ":group", constraints: proc { |req| (PgBouncerHero.groups.keys.map(&:parameterize) + [ nil ]).include?(req.params[:group]) } do
+    scope path: ":database", constraints: proc { |req| (PgBouncerHero.groups[req.params[:group]].databases.map(&:name).map(&:parameterize) + [ nil ]).include?(req.params[:database]) } do
       get :summary, controller: :database
       get :databases, controller: :database
       get :stats, controller: :database

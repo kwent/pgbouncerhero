@@ -1,37 +1,31 @@
-<div class="ui active segment">
-  <h4 class="ui header">
-    <div class="content">Stats</div>
-  </h4>
-  <table class="ui compact table">
-    <thead>
-      <tr>
-        <% stats.first.keys.each do |key| %>
-          <th>
-            <%= key.titleize %>
-          </th>
-        <% end %>
-      </tr>
-    </thead>
-    <tbody>
-      <% stats.each do |row| %>
+<div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+  <div class="px-4 py-3 border-b border-gray-200">
+    <h4 class="text-base font-semibold text-gray-900">Stats</h4>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
         <tr>
-          <% row.each do |k,v| %>
-            <% if ['total_received', 'total_sent', 'avg_recv', 'avg_sent'].include? k %>
-              <td>
-                <%= number_to_human_size(v) %>
-              </td>
-            <% elsif ['total_query_time', 'avg_query'].include? k %>
-              <td>
-                <%= humanize_ms(v.to_i) %>
-              </td>
-            <% else %>
-              <td>
-                <%= v %>
-              </td>
-            <% end %>
+          <% stats.first.keys.each do |key| %>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= key.titleize %></th>
           <% end %>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% stats.each do |row| %>
+          <tr class="hover:bg-gray-50">
+            <% row.each do |k, v| %>
+              <% if %w[total_received total_sent avg_recv avg_sent].include?(k) %>
+                <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"><%= number_to_human_size(v) %></td>
+              <% elsif %w[total_query_time avg_query].include?(k) %>
+                <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"><%= humanize_ms(v.to_i) %></td>
+              <% else %>
+                <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"><%= v %></td>
+              <% end %>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

@@ -1,43 +1,43 @@
-<% connected = database.connection %>
-<% if connected %>
-  <div class="ui horizontal segments" id="<%= id %>" style="background-color: white !important;">
-    <div class="ui segment">
-      <% summary = database.summary %>
+<% if database.connection %>
+  <% summary = database.summary %>
+  <div class="px-4 py-3 flex items-start gap-6">
+    <div class="space-y-1 text-sm text-gray-700">
       <div>
-        <i class="users icon"></i>
-        <% number = summary.select { |row| row['list'] == 'users' }.first['items'] %>
-        <%= pluralize(number, 'user') %>
+        <% number = summary.select { |row| row["list"] == "users" }.first["items"] %>
+        <%= pluralize(number, "user") %>
       </div>
       <div>
-        <i class="database icon"></i>
-        <% number = summary.select { |row| row['list'] == 'databases' }.first['items'].to_i - 1 %>
-        <%= pluralize(number, 'database') %>
+        <% number = summary.select { |row| row["list"] == "databases" }.first["items"].to_i - 1 %>
+        <%= pluralize(number, "database") %>
       </div>
       <div>
-        <i class="plug icon"></i>
-        <% number = summary.select { |row| row['list'] == 'pools' }.first['items'].to_i - 1 %>
-        <%= pluralize(number, 'pool') %>
+        <% number = summary.select { |row| row["list"] == "pools" }.first["items"].to_i - 1 %>
+        <%= pluralize(number, "pool") %>
       </div>
     </div>
-    <div class="ui segment">
-      <ul style="margin: 0; padding-left: 5px;">
-        <% summary.select{ |row| row.key?(:databases_details) }.first[:databases_details].each do |db| %>
-          <li style="margin: 0; list-style-type: none;">
-            <span>
-              <i class="database icon"></i>
-              <strong>
-                <%= db['name'] %>
-              </strong>
-              <div class="ui progress small success" style="float:right; width: 150px; margin-top:4px;" data-value="<%= db['current_connections'] %>" data-total="<%= db['max_connections'] %>">
-                <div class="bar">
-                  <div class="progress"></div>
-                </div>
-                <div class="label">Connections</div>
-              </div>
-            </span>
-          </li>
-        <% end %>
-      </ul>
+    <div class="flex-1 space-y-2">
+      <% summary.select { |row| row.key?(:databases_details) }.first[:databases_details].each do |db| %>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="font-medium text-gray-900 w-24 truncate"><%= db["name"] %></span>
+          <div class="flex-1">
+            <% current = db["current_connections"].to_i %>
+            <% max = db["max_connections"].to_i %>
+            <% pct = max > 0 ? (current.to_f / max * 100).round : 0 %>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+              <div class="bg-green-500 h-2.5 rounded-full" style="width: <%= pct %>%"></div>
+            </div>
+            <div class="text-xs text-gray-500 mt-0.5"><%= current %> / <%= max %> connections</div>
+          </div>
+        </div>
+      <% end %>
     </div>
+  </div>
+  <div class="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
+    <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">Online</span>
+    <span class="text-xs text-gray-400">Last refresh: <%= Time.now.strftime("%H:%M:%S %Z") %></span>
+  </div>
+<% else %>
+  <div class="px-4 py-6 text-center">
+    <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/20 ring-inset">Offline</span>
   </div>
 <% end %>
