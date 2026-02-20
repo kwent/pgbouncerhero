@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.2", "3.3", "3.4"]
+        ruby: ["3.2", "3.3", "3.4", "4.0"]
         rails: ["rails-7-2", "rails-8-0", "rails-8-1"]
     name: Ruby ${{ matrix.ruby }} / ${{ matrix.rails }}
     steps:
@@ -20,7 +20,9 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
+          bundler-cache: false
+      - run: chmod -R o-w "$(ruby -e 'puts Gem.dir')/gems" 2>/dev/null || true
+      - run: bundle install
       - run: bundle exec appraisal ${{ matrix.rails }} bundle install
       - run: bundle exec appraisal ${{ matrix.rails }} rake test
 
