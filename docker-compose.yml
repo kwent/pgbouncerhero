@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: pgbouncer
+      POSTGRES_PASSWORD: pgbouncer
+      POSTGRES_DB: app
+    ports:
+      - "5432:5432"
+
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_USERNAME: pgbouncer
+      POSTGRESQL_PASSWORD: pgbouncer
+      POSTGRESQL_DATABASE: app
+      PGBOUNCER_AUTH_TYPE: trust
+      PGBOUNCER_IGNORE_STARTUP_PARAMETERS: extra_float_digits
+    ports:
+      - "6432:6432"
+    depends_on:
+      - postgres
