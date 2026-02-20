@@ -78,6 +78,36 @@ pgbouncers:
       url: <%= ENV["PGBOUNCER_STAGING_REPLICA_DATABASE_URL"] %>
 ```
 
+## Development
+
+Start PostgreSQL and PgBouncer with Docker:
+
+```bash
+docker compose up -d
+```
+
+Run the dummy Rails app:
+
+```bash
+PGBOUNCERHERO_DATABASE_URL=postgres://pgbouncer:pgbouncer@localhost:6432/pgbouncer \
+  bundle exec rackup test/dummy/config.ru -p 3000
+```
+
+Then open http://localhost:3000/pgbouncerhero.
+
+Run the test suite:
+
+```bash
+bundle exec rake              # tests + rubocop + herb
+bundle exec appraisal rake test  # tests across Rails 7.2, 8.0, 8.1
+```
+
+Stop Docker when done:
+
+```bash
+docker compose down
+```
+
 ## Contributing
 
 1. Fork it

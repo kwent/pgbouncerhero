@@ -6,18 +6,17 @@ services:
       POSTGRES_PASSWORD: pgbouncer
       POSTGRES_DB: app
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   pgbouncer:
-    image: bitnami/pgbouncer:latest
+    image: edoburu/pgbouncer:latest
     environment:
-      POSTGRESQL_HOST: postgres
-      POSTGRESQL_PORT: 5432
-      POSTGRESQL_USERNAME: pgbouncer
-      POSTGRESQL_PASSWORD: pgbouncer
-      POSTGRESQL_DATABASE: app
-      PGBOUNCER_AUTH_TYPE: trust
-      PGBOUNCER_IGNORE_STARTUP_PARAMETERS: extra_float_digits
+      DATABASE_URL: postgres://pgbouncer:pgbouncer@postgres:5432/app
+      AUTH_TYPE: trust
+      IGNORE_STARTUP_PARAMETERS: extra_float_digits
+      ADMIN_USERS: pgbouncer
+      MAX_CLIENT_CONN: 100
+      DEFAULT_POOL_SIZE: 20
     ports:
       - "6432:6432"
     depends_on:
