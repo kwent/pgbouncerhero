@@ -17,7 +17,7 @@ PgBouncerHero is a Ruby gem that ships as a **Rails Engine** providing a web das
 bundle install                # Install dependencies
 bundle exec rake test         # Run minitest suite
 bundle exec rubocop           # Run RuboCop linter
-bundle exec herb analyze .    # Run Herb ERB linter
+bundle exec herb analyze app/views  # Run Herb ERB linter
 bundle exec rake              # Run all (test + rubocop + herb:lint)
 gem build pgbouncerhero.gemspec  # Build the gem
 bundle exec appraisal install    # Install Appraisal gemfiles
@@ -76,7 +76,7 @@ Optional HTTP Basic Auth via `PGBOUNCERHERO_USERNAME` / `PGBOUNCERHERO_PASSWORD`
 - `test/test_helper.rb` — Loads dummy app and minitest.
 - Tests cover: version, config, groups, connection, database, helpers.
 - Appraisal tests against Rails 7.2, 8.0, and 8.1.
-- CI runs Ruby 3.2/3.3/3.4/4.0 x Rails 7.2/8.0/8.1.
+- CI runs Ruby 3.2/3.3/3.4 x Rails 7.2/8.0/8.1.
 
 ## Linting
 

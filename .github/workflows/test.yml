@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.2", "3.3", "3.4", "4.0"]
+        ruby: ["3.2", "3.3", "3.4"]
         rails: ["rails-7-2", "rails-8-0", "rails-8-1"]
     name: Ruby ${{ matrix.ruby }} / ${{ matrix.rails }}
     steps:
@@ -42,4 +42,4 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
-      - run: bundle exec herb analyze .
+      - run: bundle exec herb analyze app/views

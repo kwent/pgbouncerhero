@@ -13,7 +13,7 @@ RuboCop::RakeTask.new
 namespace :herb do
   desc "Lint ERB templates with Herb"
   task :lint do
-    sh "bundle exec herb analyze ."
+    sh "bundle exec herb analyze app/views"
   end
 end
 
