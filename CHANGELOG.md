@@ -10,6 +10,7 @@
 - Resolve parameterized group and database names consistently in routes and controllers
 - Load Rails engine dependencies explicitly and declare Propshaft as a runtime dependency
 - Cache Appraisal dependencies directly in the Ruby/Rails CI matrix
+- Pin GitHub Actions to their current immutable release commits
 - Add read-only workflow permissions, cancellation of superseded runs, and job timeouts
 
 ## 3.0.0
