@@ -1,5 +1,7 @@
 module PgBouncerHero
   class DatabaseController < ApplicationController
+    before_action :ensure_writable!, only: %i[reload suspend resume shutdown]
+
     def summary
       if @database.connection
         @dbs = @database.summary
@@ -48,6 +50,14 @@ module PgBouncerHero
       end
     end
 
+    def state
+      if @database.connection
+        @state = @database.state
+      else
+        flash[:error] = "#{@database.name} does not look online."
+      end
+    end
+
     def reload
       execute_admin_command(:reload, "reloaded")
     end
@@ -56,15 +66,25 @@ module PgBouncerHero
       execute_admin_command(:suspend, "suspended")
     end
 
+    def resume
+      execute_admin_command(:resume, "resumed")
+    end
+
     def shutdown
-      execute_admin_command(:shutdown, "shut down")
+      execute_admin_command(:shutdown, "asked to shut down after its clients disconnect", :wait_for_clients)
     end
 
     private
 
-    def execute_admin_command(command, past_tense)
+    def ensure_writable!
+      return unless PgBouncerHero.read_only?
+
+      render plain: "PgBouncerHero is configured as read-only.", status: :forbidden
+    end
+
+    def execute_admin_command(command, past_tense, *arguments)
       if @database.connection
-        @database.public_send(command)
+        @database.public_send(command, *arguments)
         flash[:success] = "#{@database.name} has been #{past_tense}."
       else
         flash[:error] = "#{@database.name} does not look online."

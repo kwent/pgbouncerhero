@@ -1,6 +1,9 @@
 ## Unreleased
 
 **New:**
+- Read-only mode for hiding and server-side blocking PgBouncer administrative commands
+- PgBouncer state visibility and Resume controls
+- Integration coverage across supported PgBouncer 1.23, 1.24, and 1.25 releases
 - Bounded, thread-safe connection pools per PgBouncer with configurable size and checkout timeout
 - Explicit `Database#with_connection` leases for running multiple commands on one connection
 - Real PgBouncer integration coverage for admin queries, summaries, reloads, authentication, and reconnection
@@ -10,6 +13,7 @@
 - Request-level engine coverage and gem-package validation in CI
 
 **Improved:**
+- Use `SHUTDOWN WAIT_FOR_CLIENTS` for graceful shutdowns initiated from the dashboard
 - Reconnect stale or failed pooled connections automatically and close every pool on reset
 - Pin PostgreSQL and PgBouncer development images and wait for container health before testing
 - Let Dependabot maintain Docker image versions alongside gems and GitHub Actions

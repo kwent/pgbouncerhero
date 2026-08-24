@@ -14,6 +14,7 @@ A graphical user interface for your PgBouncers.
 
 - Ruby >= 3.2
 - Rails >= 7.2
+- PgBouncer >= 1.23
 - Propshaft (asset pipeline)
 - importmap-rails
 
@@ -78,6 +79,9 @@ pgbouncers:
       url: <%= ENV["PGBOUNCER_STAGING_PRIMARY_DATABASE_URL"] %>
     replica:
       url: <%= ENV["PGBOUNCER_STAGING_REPLICA_DATABASE_URL"] %>
+
+# Optional: allow monitoring while blocking all administrative commands
+read_only: true
 ```
 
 Environment-specific top-level keys are also supported. PgBouncerHero reads
@@ -117,6 +121,21 @@ end
 existing integrations. Connections are checked when borrowed, and stale or
 failed connections are discarded and recreated automatically.
 
+### Safe Administration
+
+The dashboard shows PgBouncer's current state and provides Reload, Suspend,
+Resume, and graceful shutdown controls. Dashboard shutdown uses
+`SHUTDOWN WAIT_FOR_CLIENTS`: PgBouncer stops accepting new clients and exits
+after existing clients disconnect. The Ruby API keeps `database.shutdown` as
+the immediate command for compatibility and also accepts `:immediate`,
+`:wait_for_clients`, or `:wait_for_servers`. State visibility requires
+PgBouncer 1.19 or newer; graceful shutdown modes require PgBouncer 1.23 or
+newer.
+
+Set `read_only: true` at the top level of `config/pgbouncerhero.yml`, or set
+`PGBOUNCERHERO_READ_ONLY=true`, to hide and server-side reject every
+administrative command. The environment variable takes precedence over YAML.
+
 ## Development
 
 Start PostgreSQL and PgBouncer with Docker:
@@ -146,6 +165,7 @@ bundle exec rake test:integration # real PgBouncer admin-console tests
 The integration task expects PostgreSQL and PgBouncer from the Compose stack.
 Override `PGBOUNCERHERO_INTEGRATION_URL` to test another PgBouncer instance.
 The default is `postgres://pgbouncer:pgbouncer@127.0.0.1:6432/pgbouncer`.
+CI runs this suite against PgBouncer 1.23, 1.24, and 1.25.
 
 Stop Docker when done:
 

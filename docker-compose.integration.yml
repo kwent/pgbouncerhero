@@ -1,0 +1,3 @@
+services:
+  pgbouncer:
+    image: ${PGBOUNCER_INTEGRATION_IMAGE}

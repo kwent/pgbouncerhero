@@ -1,6 +1,13 @@
 module PgBouncerHero
   module Methods
     module Basics
+      SHUTDOWN_MODES = {
+        nil => "",
+        immediate: "",
+        wait_for_clients: " WAIT_FOR_CLIENTS",
+        wait_for_servers: " WAIT_FOR_SERVERS"
+      }.freeze
+
       def summary
         if connection
           l = lists
@@ -29,14 +36,23 @@ module PgBouncerHero
       def conf
         execute("SHOW config")
       end
+      def state
+        execute("SHOW state")
+      end
       def reload
         execute("RELOAD")
       end
       def suspend
         execute("SUSPEND")
       end
-      def shutdown
-        execute("SHUTDOWN")
+      def resume
+        execute("RESUME")
+      end
+      def shutdown(mode = nil)
+        suffix = SHUTDOWN_MODES.fetch(mode)
+        execute("SHUTDOWN#{suffix}")
+      rescue KeyError
+        raise ArgumentError, "unsupported shutdown mode: #{mode.inspect}"
       end
     end
   end

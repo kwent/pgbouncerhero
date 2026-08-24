@@ -33,12 +33,15 @@ class PgBouncerIntegrationTest < Minitest::Test
       lists: @database.lists,
       pools: @database.pools,
       clients: @database.clients,
-      config: @database.conf
+      config: @database.conf,
+      state: @database.state
     }
 
     results.each_value { |result| assert_instance_of PG::Result, result }
     assert_includes results.fetch(:databases).map { |row| row.fetch("name") }, "app"
     assert_includes results.fetch(:config).map { |row| row.fetch("key") }, "listen_port"
+    state = results.fetch(:state).to_h { |row| [ row.fetch("key"), row.fetch("value") ] }
+    assert_equal "yes", state.fetch("active")
   end
 
   def test_builds_a_summary_from_real_results
@@ -93,6 +96,22 @@ class PgBouncerIntegrationTest < Minitest::Test
     result = @database.reload
 
     assert_equal PG::PGRES_COMMAND_OK, result.result_status
+    assert_instance_of PG::Result, @database.stats
+  end
+
+  def test_suspends_and_resumes_pgbouncer_on_one_admin_connection
+    statuses = @database.with_connection do |connection|
+      suspended = false
+      suspend_result = connection.exec("SUSPEND")
+      suspended = true
+      resume_result = connection.exec("RESUME")
+      suspended = false
+      [ suspend_result.result_status, resume_result.result_status ]
+    ensure
+      connection.exec("RESUME") if suspended
+    end
+
+    assert_equal [ PG::PGRES_COMMAND_OK, PG::PGRES_COMMAND_OK ], statuses
     assert_instance_of PG::Result, @database.stats
   end
 
