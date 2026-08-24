@@ -1,11 +1,15 @@
 ## Unreleased
 
 **New:**
+- Real PgBouncer integration coverage for admin queries, summaries, reloads, authentication, and reconnection
+- A dedicated CI integration job backed by the repository's Docker Compose stack
 - Configurable `PgBouncerHero.config_path`, resolved from the host application's `Rails.root` by default
 - `PgBouncerHero.reset!` for reloading configuration and connections safely
 - Request-level engine coverage and gem-package validation in CI
 
 **Improved:**
+- Pin PostgreSQL and PgBouncer development images and wait for container health before testing
+- Let Dependabot maintain Docker image versions alongside gems and GitHub Actions
 - Serialize commands per database so a memoized PG connection is not used concurrently
 - Resolve parameterized group and database names consistently in routes and controllers
 - Load Rails engine dependencies explicitly and declare Propshaft as a runtime dependency

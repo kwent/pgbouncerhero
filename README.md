@@ -99,7 +99,7 @@ with `PGBOUNCERHERO_TIMEOUT`.
 Start PostgreSQL and PgBouncer with Docker:
 
 ```bash
-docker compose up -d
+docker compose up --detach --wait
 ```
 
 Run the dummy Rails app:
@@ -114,15 +114,20 @@ Then open http://localhost:3000/pgbouncerhero.
 Run the test suite:
 
 ```bash
-bundle exec rake              # tests + rubocop + herb
+bundle exec rake                 # unit/integration-free tests + rubocop + herb
 bundle exec appraisal rake test  # tests across Rails 7.2, 8.0, and 8.1
-bundle exec rake build        # build and validate the gem package
+bundle exec rake build           # build and validate the gem package
+bundle exec rake test:integration # real PgBouncer admin-console tests
 ```
+
+The integration task expects PostgreSQL and PgBouncer from the Compose stack.
+Override `PGBOUNCERHERO_INTEGRATION_URL` to test another PgBouncer instance.
+The default is `postgres://pgbouncer:pgbouncer@127.0.0.1:6432/pgbouncer`.
 
 Stop Docker when done:
 
 ```bash
-docker compose down
+docker compose down --volumes
 ```
 
 ## Contributing
