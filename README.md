@@ -175,14 +175,14 @@ docker compose down --volumes
 
 ### Releasing
 
-Releases use RubyGems trusted publishing through GitHub Actions, with no stored
-RubyGems API key. Configure a trusted publisher for the `pgbouncerhero` gem on
-RubyGems.org with repository owner `kwent`, repository `pgbouncerhero`, workflow
-`release.yml`, and environment `release`. Then run the **Release** workflow on
-`master` and enter the version already committed in
+Releases use a scoped RubyGems OIDC API Key Role through GitHub Actions, with no
+long-lived RubyGems API key. The role is restricted to the `pgbouncerhero` gem,
+the `kwent/pgbouncerhero` repository, and the `rubygems.org` audience. Store its
+role token in the `RUBYGEMS_OIDC_ROLE` GitHub Actions secret. Then run the
+**Release** workflow on `master` and enter the version already committed in
 `lib/pgbouncerhero/version.rb`. The workflow verifies the version and test
-suite, publishes the gem with an OIDC credential, pushes the version tag, and
-creates the matching GitHub release.
+suite, exchanges GitHub's OIDC identity for a short-lived credential, publishes
+the gem, pushes the version tag, and creates the matching GitHub release.
 
 ## Contributing
 

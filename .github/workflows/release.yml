@@ -42,7 +42,13 @@ jobs:
           fi
       - name: Verify release
         run: bundle exec rake
+      - name: Configure RubyGems OIDC credentials
+        uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
+        with:
+          role-to-assume: ${{ secrets.RUBYGEMS_OIDC_ROLE }}
       - uses: rubygems/release-gem@7f9650160c1a4e7989fdc9855807bdbd421d8b6b # v1.4.1
+        with:
+          setup-trusted-publisher: false
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
