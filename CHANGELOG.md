@@ -8,6 +8,8 @@
 **Improved:**
 - Refresh every monitoring view automatically, with manual refresh and background-tab pausing
 - Complete the Tailwind CSS 4 migration and verify the committed stylesheet stays current in CI
+- Search monitoring tables, choose visible columns, and keep identifier and maintenance columns visible while scrolling
+- Show only the administrative actions that apply to the current PgBouncer or database state
 
 ## 3.1.0 - 2026-08-23
 

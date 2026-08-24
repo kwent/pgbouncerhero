@@ -1,9 +1,11 @@
 module PgBouncerHero
   class DatabaseController < ApplicationController
     DATABASE_ADMIN_ACTIONS = %i[pause_database reconnect_database wait_close_database resume_database].freeze
+    MONITORING_ACTIONS = %i[databases stats pools clients servers users conf state].freeze
 
     before_action :ensure_writable!, only: [ :reload, :suspend, :resume, :shutdown, *DATABASE_ADMIN_ACTIONS ]
     before_action :set_target_database, only: DATABASE_ADMIN_ACTIONS
+    before_action :set_admin_state, only: MONITORING_ACTIONS
 
     def summary
       if @database.connection
@@ -70,8 +72,8 @@ module PgBouncerHero
     end
 
     def state
-      if @database.connection
-        @state = @database.state
+      if @admin_state
+        @state = @admin_state
       else
         flash[:error] = "#{@database.name} does not look online."
       end
@@ -110,6 +112,12 @@ module PgBouncerHero
     end
 
     private
+
+    def set_admin_state
+      @admin_state = @database.state
+    rescue PG::Error
+      @admin_state = nil
+    end
 
     def ensure_writable!
       return unless PgBouncerHero.read_only?

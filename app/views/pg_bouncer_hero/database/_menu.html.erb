@@ -1,3 +1,6 @@
+<% state_rows = @admin_state&.to_a || [] %>
+<% state_known = state_rows.any? %>
+<% resumable = state_rows.any? { |row| %w[paused suspended].include?(row["key"]) && row["value"] == "yes" } %>
 <nav class="bg-white rounded-lg border border-gray-200 shadow-xs mb-6">
   <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between flex-wrap gap-2">
     <div class="flex items-center gap-4 flex-wrap">
@@ -16,8 +19,12 @@
         <span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-300 ring-inset">Read-only</span>
       <% else %>
         <%= button_to "Reload", reload_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-green-300 text-green-700 hover:bg-green-50", form: { data: { turbo_confirm: "Reload PgBouncer configuration?" } } %>
-        <%= button_to "Suspend", suspend_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-blue-300 text-blue-700 hover:bg-blue-50", form: { data: { turbo_confirm: "Suspend all PgBouncer socket processing until Resume is selected?" } } %>
-        <%= button_to "Resume all", resume_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-green-300 text-green-700 hover:bg-green-50", form: { data: { turbo_confirm: "Resume all paused or suspended PgBouncer processing?" } } %>
+        <% if !state_known || !resumable %>
+          <%= button_to "Suspend", suspend_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-blue-300 text-blue-700 hover:bg-blue-50", form: { data: { turbo_confirm: "Suspend all PgBouncer socket processing until Resume is selected?" } } %>
+        <% end %>
+        <% if !state_known || resumable %>
+          <%= button_to "Resume all", resume_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-green-300 text-green-700 hover:bg-green-50", form: { data: { turbo_confirm: "Resume all paused or suspended PgBouncer processing?" } } %>
+        <% end %>
         <%= button_to "Graceful shutdown", shutdown_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-red-300 text-red-700 hover:bg-red-50", form: { data: { turbo_confirm: "Stop accepting new clients and shut down after existing clients disconnect?" } } %>
       <% end %>
     </div>

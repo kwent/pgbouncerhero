@@ -146,16 +146,44 @@ class EngineTest < ActionDispatch::IntegrationTest
 
   def test_database_page_renders_scoped_maintenance_controls
     rows = [ { "name" => "app", "paused" => "0" }, { "name" => "pgbouncer", "paused" => "0" } ]
-    with_stubbed_database(:databases, rows) do
+    with_stubbed_database_methods({ databases: rows, state: active_state }) do
       get "/pgbouncerhero/operations/primary/databases"
 
       assert_response :success
       assert_select "th", text: "Maintenance", count: 1
-      %w[pause_database reconnect_database wait_close_database resume_database].each do |action|
+      %w[pause_database reconnect_database wait_close_database].each do |action|
         assert_select "form[action$='/#{action}']", count: 1 do
           assert_select "input[name='target_database'][value='app']", count: 1
         end
       end
+      assert_select "form[action$='/resume_database']", count: 0
+    end
+  end
+
+  def test_database_page_replaces_pause_with_resume_for_a_paused_database
+    rows = [ { "name" => "app", "paused" => "1" }, { "name" => "pgbouncer", "paused" => "0" } ]
+    with_stubbed_database_methods({ databases: rows, state: active_state }) do
+      get "/pgbouncerhero/operations/primary/databases"
+
+      assert_response :success
+      assert_select "form[action$='/pause_database']", count: 0
+      %w[reconnect_database wait_close_database resume_database].each do |action|
+        assert_select "form[action$='/#{action}']", count: 1
+      end
+    end
+  end
+
+  def test_monitoring_tables_render_search_and_column_controls
+    rows = [ { "database" => "app", "cl_active" => "1", "cl_waiting" => "0" } ]
+    with_stubbed_database_methods({ pools: rows, state: active_state }) do
+      get "/pgbouncerhero/operations/primary/pools"
+
+      assert_response :success
+      assert_select "div[data-controller='data-table']", count: 1
+      assert_select "input[type='search'][data-data-table-target='query']", count: 1
+      assert_select "div[data-data-table-target='columnMenu']", count: 1
+      assert_select "tr[data-data-table-target='row']", count: 1
+      assert_select "th[data-column-key='database']", count: 1
     end
   end
 
@@ -191,25 +219,39 @@ class EngineTest < ActionDispatch::IntegrationTest
     assert_equal %i[pause reconnect wait_close resume].map { |method| [ method, "app" ] }, calls
   end
 
-  def test_writable_mode_renders_complete_admin_controls
-    with_config(<<~YAML) do
-      pgbouncers:
-        Operations:
-          Primary: {}
-    YAML
+  def test_writable_mode_renders_suspend_while_pgbouncer_is_active
+    with_stubbed_database_methods({ state: active_state }) do
       get "/pgbouncerhero/operations/primary/state"
 
       assert_response :success
       assert_select "form[action$='/reload']", count: 1
       assert_select "form[action$='/suspend']", count: 1
-      assert_select "form[action$='/resume']", count: 1
+      assert_select "form[action$='/resume']", count: 0
       assert_select "form[action$='/shutdown']", count: 1
-      assert_select "button", "Resume all"
       assert_select "button", "Graceful shutdown"
     end
   end
 
+  def test_writable_mode_replaces_suspend_with_resume_while_pgbouncer_is_suspended
+    with_stubbed_database_methods({ state: suspended_state }) do
+      get "/pgbouncerhero/operations/primary/state"
+
+      assert_response :success
+      assert_select "form[action$='/suspend']", count: 0
+      assert_select "form[action$='/resume']", count: 1
+      assert_select "button", "Resume all"
+    end
+  end
+
   private
+
+  def active_state
+    [ { "key" => "active", "value" => "yes" }, { "key" => "paused", "value" => "no" }, { "key" => "suspended", "value" => "no" } ]
+  end
+
+  def suspended_state
+    [ { "key" => "active", "value" => "no" }, { "key" => "paused", "value" => "no" }, { "key" => "suspended", "value" => "yes" } ]
+  end
 
   def with_config(contents)
     previous_path = PgBouncerHero.instance_variable_get(:@config_path)
@@ -238,6 +280,9 @@ class EngineTest < ActionDispatch::IntegrationTest
     YAML
       database = PgBouncerHero.groups.fetch("operations").databases.first
       database.define_singleton_method(:connection) { true }
+      defaulted_state = !results.key?(:state)
+      state_result = active_state
+      database.define_singleton_method(:state) { state_result } if defaulted_state
       results.each do |method, result|
         database.define_singleton_method(method) { |*arguments| result.respond_to?(:call) ? result.call(*arguments) : result }
       end
@@ -245,6 +290,7 @@ class EngineTest < ActionDispatch::IntegrationTest
     ensure
       database&.singleton_class&.remove_method(:connection)
       results&.each_key { |method| database.singleton_class.remove_method(method) }
+      database&.singleton_class&.remove_method(:state) if defaulted_state
     end
   end
 
