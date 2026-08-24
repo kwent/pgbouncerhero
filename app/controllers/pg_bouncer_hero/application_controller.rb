@@ -13,10 +13,11 @@ module PgBouncerHero
     def set_database
       @groups = PgBouncerHero.groups
       if params[:group] && params[:database]
-        @database = PgBouncerHero.groups[params[:group]].databases.find { |db| db.id.to_s == params[:database].to_s }
+        @group = @groups.fetch(params[:group])
+        @database = @group.databases.find { |database| database.name.parameterize == params[:database] }
       else
-        @group = @groups.first
-        @database = @groups.first.last.databases.first
+        _group_id, @group = @groups.first
+        @database = @group.databases.first
       end
     end
   end

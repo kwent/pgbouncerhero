@@ -1,3 +1,18 @@
+## Unreleased
+
+**New:**
+- Configurable `PgBouncerHero.config_path`, resolved from the host application's `Rails.root` by default
+- `PgBouncerHero.reset!` for reloading configuration and connections safely
+- Request-level engine coverage and gem-package validation in CI
+
+**Improved:**
+- Serialize commands per database so a memoized PG connection is not used concurrently
+- Resolve parameterized group and database names consistently in routes and controllers
+- Load Rails engine dependencies explicitly and declare Propshaft as a runtime dependency
+- Cache Appraisal dependencies directly in the Ruby/Rails CI matrix
+- Pin GitHub Actions to their current immutable release commits
+- Add read-only workflow permissions, cancellation of superseded runs, and job timeouts
+
 ## 3.0.0
 
 **Breaking Changes:**

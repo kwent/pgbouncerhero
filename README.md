@@ -78,6 +78,22 @@ pgbouncers:
       url: <%= ENV["PGBOUNCER_STAGING_REPLICA_DATABASE_URL"] %>
 ```
 
+Environment-specific top-level keys are also supported. PgBouncerHero reads
+`config/pgbouncerhero.yml` from the host application's `Rails.root` by default.
+An initializer can point to a different file:
+
+```ruby
+PgBouncerHero.config_path = Rails.root.join("config/pgbouncerhero.production.yml")
+```
+
+Changing `PgBouncerHero.env` or `config_path` resets cached groups and closes
+their open connections. Call `PgBouncerHero.reset!` after changing a config
+file at runtime, or `PgBouncerHero.disconnect!` when only the connections need
+to be closed. Stale connections reconnect automatically.
+
+The PostgreSQL connection timeout defaults to five seconds and can be changed
+with `PGBOUNCERHERO_TIMEOUT`.
+
 ## Development
 
 Start PostgreSQL and PgBouncer with Docker:
@@ -99,7 +115,8 @@ Run the test suite:
 
 ```bash
 bundle exec rake              # tests + rubocop + herb
-bundle exec appraisal rake test  # tests across Rails 7.2, 8.0, 8.1
+bundle exec appraisal rake test  # tests across Rails 7.2, 8.0, and 8.1
+bundle exec rake build        # build and validate the gem package
 ```
 
 Stop Docker when done:

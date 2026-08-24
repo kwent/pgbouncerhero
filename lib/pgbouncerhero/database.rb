@@ -1,3 +1,5 @@
+require "monitor"
+
 module PgBouncerHero
   class Database
     include Methods::Basics
@@ -7,8 +9,9 @@ module PgBouncerHero
     def initialize(group, id, config)
       @id = id
       @config = config || {}
-      @url = URI.parse(config["url"].to_s)
+      @url = URI.parse(@config["url"].to_s)
       @group = group
+      @connection_monitor = Monitor.new
     end
 
     def name
@@ -16,16 +19,14 @@ module PgBouncerHero
     end
 
     def connection
-      disconnect! if @connection && connection_invalid?(@connection)
-      @connection ||= connection_model.new(host, port, user, password, dbname).connection
+      @connection_monitor.synchronize do
+        disconnect_connection! if @connection && connection_invalid?(@connection)
+        @connection ||= connection_model.new(host, port, user, password, dbname).connection
+      end
     end
 
     def disconnect!
-      @connection&.finish unless @connection&.finished?
-    rescue PG::Error
-      nil
-    ensure
-      @connection = nil
+      @connection_monitor.synchronize { disconnect_connection! }
     end
 
     def host
@@ -49,6 +50,20 @@ module PgBouncerHero
     end
 
     private
+
+    def execute(command)
+      @connection_monitor.synchronize do
+        connection&.exec(command)
+      end
+    end
+
+    def disconnect_connection!
+      @connection&.finish unless @connection&.finished?
+    rescue PG::Error
+      nil
+    ensure
+      @connection = nil
+    end
 
     def connection_invalid?(connection)
       connection.finished? || connection.status != PG::CONNECTION_OK
