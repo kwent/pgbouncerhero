@@ -6,6 +6,7 @@ export default class extends Controller {
 
   connect() {
     this.columns = Array.from(this.element.querySelectorAll("thead th"))
+    this.columnPreferences = this.loadColumnPreferences()
     this.buildColumnMenu()
     this.filter()
   }
@@ -26,12 +27,16 @@ export default class extends Controller {
 
   toggleColumn(event) {
     const index = Number(event.currentTarget.dataset.columnIndex)
+    const key = event.currentTarget.dataset.columnKey
     const visible = event.currentTarget.checked
 
     this.element.querySelectorAll("tr").forEach(row => {
       const cell = row.children[index]
       if (cell) cell.hidden = !visible
     })
+
+    this.columnPreferences[key] = visible
+    this.saveColumnPreferences()
   }
 
   buildColumnMenu() {
@@ -39,7 +44,8 @@ export default class extends Controller {
       if (column.dataset.columnLocked === "true") return
 
       const key = column.dataset.columnKey
-      const checked = !this.defaultHiddenValue.includes(key)
+      const savedVisibility = this.columnPreferences[key]
+      const checked = savedVisibility === undefined ? !this.defaultHiddenValue.includes(key) : savedVisibility
       const label = document.createElement("label")
       label.className = "flex items-center gap-2 whitespace-nowrap"
 
@@ -47,6 +53,7 @@ export default class extends Controller {
       checkbox.type = "checkbox"
       checkbox.checked = checked
       checkbox.dataset.columnIndex = index
+      checkbox.dataset.columnKey = key
       checkbox.dataset.action = "data-table#toggleColumn"
 
       const text = document.createElement("span")
@@ -62,5 +69,26 @@ export default class extends Controller {
         })
       }
     })
+  }
+
+  loadColumnPreferences() {
+    try {
+      const preferences = JSON.parse(window.localStorage.getItem(this.storageKey))
+      return preferences && typeof preferences === "object" && !Array.isArray(preferences) ? preferences : {}
+    } catch {
+      return {}
+    }
+  }
+
+  saveColumnPreferences() {
+    try {
+      window.localStorage.setItem(this.storageKey, JSON.stringify(this.columnPreferences))
+    } catch {
+      // The table remains usable when storage is disabled or full.
+    }
+  }
+
+  get storageKey() {
+    return `pgbouncerhero:data-table:${this.queryTarget.id}`
   }
 }
