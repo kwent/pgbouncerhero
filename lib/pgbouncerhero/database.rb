@@ -16,7 +16,16 @@ module PgBouncerHero
     end
 
     def connection
+      disconnect! if @connection && connection_invalid?(@connection)
       @connection ||= connection_model.new(host, port, user, password, dbname).connection
+    end
+
+    def disconnect!
+      @connection&.finish unless @connection&.finished?
+    rescue PG::Error
+      nil
+    ensure
+      @connection = nil
     end
 
     def host
@@ -40,6 +49,12 @@ module PgBouncerHero
     end
 
     private
+
+    def connection_invalid?(connection)
+      connection.finished? || connection.status != PG::CONNECTION_OK
+    rescue PG::Error
+      true
+    end
 
     def connection_model
       @connection_model ||= begin

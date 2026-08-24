@@ -26,6 +26,21 @@ class PgBouncerHeroTest < Minitest::Test
     PgBouncerHero.instance_variable_set(:@groups, nil)
   end
 
+  def test_disconnect_closes_initialized_database_connections
+    disconnected = false
+    database = Object.new
+    database.define_singleton_method(:disconnect!) { disconnected = true }
+    group = Struct.new(:databases).new([ database ])
+    previous_groups = PgBouncerHero.instance_variable_get(:@groups)
+    PgBouncerHero.instance_variable_set(:@groups, { "test" => group })
+
+    PgBouncerHero.disconnect!
+
+    assert disconnected
+  ensure
+    PgBouncerHero.instance_variable_set(:@groups, previous_groups)
+  end
+
   def test_importmap_exists
     assert_kind_of Importmap::Map, PgBouncerHero.importmap
   end
