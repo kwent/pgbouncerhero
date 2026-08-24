@@ -54,14 +54,34 @@ module PgBouncerHero
       def suspend
         execute("SUSPEND")
       end
-      def resume
-        execute("RESUME")
+      def pause(database_name)
+        execute_database_command("PAUSE", database_name)
+      end
+      def reconnect(database_name)
+        execute_database_command("RECONNECT", database_name)
+      end
+      def wait_close(database_name)
+        execute_database_command("WAIT_CLOSE", database_name)
+      end
+      def resume(database_name = nil)
+        return execute("RESUME") if database_name.nil?
+
+        execute_database_command("RESUME", database_name)
       end
       def shutdown(mode = nil)
         suffix = SHUTDOWN_MODES.fetch(mode)
         execute("SHUTDOWN#{suffix}")
       rescue KeyError
         raise ArgumentError, "unsupported shutdown mode: #{mode.inspect}"
+      end
+
+      private
+
+      def execute_database_command(command, database_name)
+        name = database_name.to_s
+        raise ArgumentError, "database name must not be empty" if name.empty?
+
+        execute("#{command} #{PG::Connection.quote_ident(name)}")
       end
     end
   end

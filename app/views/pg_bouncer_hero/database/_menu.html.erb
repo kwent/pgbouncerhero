@@ -17,7 +17,7 @@
       <% else %>
         <%= button_to "Reload", reload_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-green-300 text-green-700 hover:bg-green-50", form: { data: { turbo_confirm: "Reload PgBouncer configuration?" } } %>
         <%= button_to "Suspend", suspend_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-blue-300 text-blue-700 hover:bg-blue-50", form: { data: { turbo_confirm: "Suspend all PgBouncer socket processing until Resume is selected?" } } %>
-        <%= button_to "Resume", resume_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-green-300 text-green-700 hover:bg-green-50", form: { data: { turbo_confirm: "Resume PgBouncer socket processing?" } } %>
+        <%= button_to "Resume all", resume_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-green-300 text-green-700 hover:bg-green-50", form: { data: { turbo_confirm: "Resume all paused or suspended PgBouncer processing?" } } %>
         <%= button_to "Graceful shutdown", shutdown_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-red-300 text-red-700 hover:bg-red-50", form: { data: { turbo_confirm: "Stop accepting new clients and shut down after existing clients disconnect?" } } %>
       <% end %>
     </div>

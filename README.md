@@ -136,6 +136,13 @@ Set `read_only: true` at the top level of `config/pgbouncerhero.yml`, or set
 `PGBOUNCERHERO_READ_ONLY=true`, to hide and server-side reject every
 administrative command. The environment variable takes precedence over YAML.
 
+The Databases view provides scoped Pause, Reconnect, Wait close, and Resume
+controls for planned maintenance and database failovers. Pause waits for that
+database's server connections to be released and makes new client queries wait;
+Reconnect replaces released server connections; Wait close confirms marked
+connections have drained; and Resume restores client processing. Database names
+are quoted before being sent to the PgBouncer admin console.
+
 Monitoring views include Databases, Stats, Pools, Clients, Servers, Users,
 Configuration, and State. Overview cards also show a waiting-client indicator
 when any pool reports a nonzero `cl_waiting` count.
