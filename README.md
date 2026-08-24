@@ -72,6 +72,7 @@ pgbouncers:
       url: <%= ENV["PGBOUNCER_PRODUCTION_PRIMARY_DATABASE_URL"] %>
       pool_size: 5
       pool_timeout: 5
+      read_only: true
     replica:
       url: <%= ENV["PGBOUNCER_PRODUCTION_REPLICA_DATABASE_URL"] %>
   staging:
@@ -135,6 +136,10 @@ newer.
 Set `read_only: true` at the top level of `config/pgbouncerhero.yml`, or set
 `PGBOUNCERHERO_READ_ONLY=true`, to hide and server-side reject every
 administrative command. The environment variable takes precedence over YAML.
+An individual PgBouncer can set `read_only: true` or `false` alongside its URL
+to override the top-level YAML default. This allows production instances to be
+read-only while staging instances remain writable. The environment variable is
+still the highest-precedence global override.
 
 The Databases view provides scoped Pause, Reconnect, Wait close, and Resume
 controls for planned maintenance and database failovers. Pause waits for that

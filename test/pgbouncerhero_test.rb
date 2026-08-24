@@ -74,6 +74,54 @@ class PgBouncerHeroTest < Minitest::Test
     end
   end
 
+  def test_per_database_read_only_setting_overrides_the_top_level_default
+    with_config(<<~YAML) do
+      read_only: true
+      pgbouncers:
+        local:
+          writable:
+            read_only: false
+          protected: {}
+    YAML
+      writable, protected = PgBouncerHero.groups.fetch("local").databases
+
+      refute_predicate writable, :read_only?
+      assert_predicate protected, :read_only?
+      assert_predicate PgBouncerHero, :read_only?
+    end
+  end
+
+  def test_read_only_environment_setting_overrides_a_database_setting
+    with_config(<<~YAML) do
+      read_only: false
+      pgbouncers:
+        local:
+          primary:
+            read_only: false
+    YAML
+      ENV["PGBOUNCERHERO_READ_ONLY"] = "on"
+
+      assert_predicate PgBouncerHero.groups.fetch("local").databases.first, :read_only?
+    ensure
+      ENV.delete("PGBOUNCERHERO_READ_ONLY")
+    end
+  end
+
+  def test_per_database_read_only_setting_rejects_invalid_values
+    with_config(<<~YAML) do
+      pgbouncers:
+        local:
+          primary:
+            read_only: sometimes
+    YAML
+      database = PgBouncerHero.groups.fetch("local").databases.first
+
+      error = assert_raises(PgBouncerHero::ConfigurationError) { database.read_only? }
+
+      assert_equal "read_only must be a boolean", error.message
+    end
+  end
+
   def test_read_only_mode_rejects_invalid_values
     ENV["PGBOUNCERHERO_READ_ONLY"] = "sometimes"
 
