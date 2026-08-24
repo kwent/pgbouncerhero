@@ -49,39 +49,70 @@ module PgBouncerHero
         execute("SHOW state")
       end
       def reload
-        execute("RELOAD")
+        instrument_admin_command(:reload) { execute("RELOAD") }
       end
       def suspend
-        execute("SUSPEND")
+        instrument_admin_command(:suspend) { execute("SUSPEND") }
       end
       def pause(database_name)
-        execute_database_command("PAUSE", database_name)
+        execute_database_command(:pause, "PAUSE", database_name)
       end
       def reconnect(database_name)
-        execute_database_command("RECONNECT", database_name)
+        execute_database_command(:reconnect, "RECONNECT", database_name)
       end
       def wait_close(database_name)
-        execute_database_command("WAIT_CLOSE", database_name)
+        execute_database_command(:wait_close, "WAIT_CLOSE", database_name)
       end
       def resume(database_name = nil)
-        return execute("RESUME") if database_name.nil?
+        return instrument_admin_command(:resume) { execute("RESUME") } if database_name.nil?
 
-        execute_database_command("RESUME", database_name)
+        execute_database_command(:resume, "RESUME", database_name)
       end
       def shutdown(mode = nil)
-        suffix = SHUTDOWN_MODES.fetch(mode)
-        execute("SHUTDOWN#{suffix}")
-      rescue KeyError
-        raise ArgumentError, "unsupported shutdown mode: #{mode.inspect}"
+        instrument_admin_command(:shutdown, mode: mode || :immediate) do
+          suffix = SHUTDOWN_MODES.fetch(mode)
+          execute("SHUTDOWN#{suffix}")
+        rescue KeyError
+          raise ArgumentError, "unsupported shutdown mode: #{mode.inspect}"
+        end
       end
 
       private
 
-      def execute_database_command(command, database_name)
+      def execute_database_command(action, command, database_name)
         name = database_name.to_s
-        raise ArgumentError, "database name must not be empty" if name.empty?
+        instrument_admin_command(action, target_database: name) do
+          raise ArgumentError, "database name must not be empty" if name.empty?
 
-        execute("#{command} #{PG::Connection.quote_ident(name)}")
+          execute("#{command} #{PG::Connection.quote_ident(name)}")
+        end
+      end
+
+      def instrument_admin_command(action, target_database: nil, **attributes)
+        payload = {
+          group: group.name,
+          database: name,
+          action: action,
+          target_database: target_database,
+          **attributes
+        }
+
+        error = nil
+        result = ActiveSupport::Notifications.instrument(PgBouncerHero::ADMIN_COMMAND_EVENT, payload) do
+          begin
+            command_result = yield
+            payload[:outcome] = command_result.nil? ? :unavailable : :success
+            command_result
+          rescue StandardError => command_error
+            error = command_error
+            payload[:outcome] = :error
+            payload[:error_class] = command_error.class.name
+            nil
+          end
+        end
+        raise error if error
+
+        result
       end
     end
   end

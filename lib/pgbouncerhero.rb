@@ -3,6 +3,7 @@ require "monitor"
 require "pathname"
 require "yaml"
 require "rails"
+require "active_support/notifications"
 require "pg"
 require "importmap-rails"
 require "turbo-rails"
@@ -15,6 +16,8 @@ require "pgbouncerhero/group"
 require "pgbouncerhero/engine"
 
 module PgBouncerHero
+  ADMIN_COMMAND_EVENT = "admin_command.pgbouncerhero"
+
   class ConfigurationError < StandardError; end
 
   BOOLEAN_SETTINGS = {

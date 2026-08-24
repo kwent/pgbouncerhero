@@ -141,6 +141,21 @@ to override the top-level YAML default. This allows production instances to be
 read-only while staging instances remain writable. The environment variable is
 still the highest-precedence global override.
 
+Every administrative command emits an `admin_command.pgbouncerhero`
+`ActiveSupport::Notifications` event, including commands called through the
+Ruby API and dashboard attempts rejected by read-only policy. The payload
+contains `group`, `database`, `action`, `target_database`, and `outcome`; a
+shutdown also includes `mode`, and failed commands include `error_class` without
+exposing credentials or database error messages. Notification events provide
+their standard duration measurement to subscribers:
+
+```ruby
+ActiveSupport::Notifications.subscribe("admin_command.pgbouncerhero") do |*args|
+  event = ActiveSupport::Notifications::Event.new(*args)
+  Rails.logger.info(event.payload.merge(duration_ms: event.duration).to_json)
+end
+```
+
 The Databases view provides scoped Pause, Reconnect, Wait close, and Resume
 controls for planned maintenance and database failovers. Pause waits for that
 database's server connections to be released and makes new client queries wait;
