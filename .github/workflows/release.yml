@@ -49,6 +49,7 @@ jobs:
       - uses: rubygems/release-gem@7f9650160c1a4e7989fdc9855807bdbd421d8b6b # v1.4.1
         with:
           setup-trusted-publisher: false
+          attestations: false
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
