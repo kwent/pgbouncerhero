@@ -153,6 +153,37 @@ class DatabaseTest < Minitest::Test
     assert_equal [ "SHOW stats", "SHOW stats" ], connections.first.queries
   end
 
+  def test_admin_commands_use_supported_pgbouncer_syntax
+    raw_connection = FakeConnection.new
+    stub_connection_model(@database) { raw_connection }
+
+    @database.state
+    @database.reload
+    @database.suspend
+    @database.resume
+    @database.shutdown
+    @database.shutdown(:immediate)
+    @database.shutdown(:wait_for_clients)
+    @database.shutdown(:wait_for_servers)
+
+    assert_equal [
+      "SHOW state",
+      "RELOAD",
+      "SUSPEND",
+      "RESUME",
+      "SHUTDOWN",
+      "SHUTDOWN",
+      "SHUTDOWN WAIT_FOR_CLIENTS",
+      "SHUTDOWN WAIT_FOR_SERVERS"
+    ], raw_connection.queries
+  end
+
+  def test_shutdown_rejects_unknown_modes
+    error = assert_raises(ArgumentError) { @database.shutdown(:eventually) }
+
+    assert_equal "unsupported shutdown mode: :eventually", error.message
+  end
+
   def test_commands_run_concurrently_up_to_the_pool_size
     tracker = ConcurrencyTracker.new
     database = build_database("pool_size" => 2)

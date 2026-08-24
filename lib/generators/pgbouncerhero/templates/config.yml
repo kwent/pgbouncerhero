@@ -16,3 +16,6 @@ pgbouncers:
 
 # Time zone (defaults to app time zone)
 # time_zone: "Pacific Time (US & Canada)"
+
+# Hide and reject Reload, Suspend, Resume, and Shutdown commands
+# read_only: true

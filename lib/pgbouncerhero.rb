@@ -17,6 +17,20 @@ require "pgbouncerhero/engine"
 module PgBouncerHero
   class ConfigurationError < StandardError; end
 
+  BOOLEAN_SETTINGS = {
+    true => true,
+    false => false,
+    "1" => true,
+    "0" => false,
+    "true" => true,
+    "false" => false,
+    "yes" => true,
+    "no" => false,
+    "on" => true,
+    "off" => false
+  }.freeze
+  private_constant :BOOLEAN_SETTINGS
+
   STATE_MONITOR = Monitor.new
   private_constant :STATE_MONITOR
 
@@ -61,6 +75,13 @@ module PgBouncerHero
           [ group_id.parameterize, PgBouncerHero::Group.new(group_id, config.fetch("pgbouncers")) ]
         end
       end
+    end
+
+    def read_only?
+      value = ENV.fetch("PGBOUNCERHERO_READ_ONLY") { config.fetch("read_only", false) }
+      BOOLEAN_SETTINGS.fetch(value.is_a?(String) ? value.downcase : value)
+    rescue KeyError
+      raise ConfigurationError, "read_only must be a boolean"
     end
 
     def disconnect!

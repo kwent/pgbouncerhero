@@ -48,6 +48,13 @@ jobs:
   integration:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        pgbouncer: ["v1.23.1-p0", "v1.24.1-p0", "v1.25.2-p0"]
+    name: PgBouncer ${{ matrix.pgbouncer }}
+    env:
+      PGBOUNCER_INTEGRATION_IMAGE: edoburu/pgbouncer:${{ matrix.pgbouncer }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
@@ -55,14 +62,14 @@ jobs:
           ruby-version: "3.4"
           bundler-cache: true
       - name: Start PostgreSQL and PgBouncer
-        run: docker compose up --detach --wait --wait-timeout 60
+        run: docker compose -f docker-compose.yml -f docker-compose.integration.yml up --detach --wait --wait-timeout 60
       - name: Run PgBouncer integration tests
         run: bundle exec rake test:integration
         env:
           PGBOUNCERHERO_INTEGRATION_URL: postgres://pgbouncer:pgbouncer@127.0.0.1:6432/pgbouncer
       - name: Show container logs after a failure
         if: failure()
-        run: docker compose logs
+        run: docker compose -f docker-compose.yml -f docker-compose.integration.yml logs
       - name: Stop PostgreSQL and PgBouncer
         if: always()
-        run: docker compose down --volumes
+        run: docker compose -f docker-compose.yml -f docker-compose.integration.yml down --volumes

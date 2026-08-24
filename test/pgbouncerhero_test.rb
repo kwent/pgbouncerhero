@@ -48,6 +48,42 @@ class PgBouncerHeroTest < Minitest::Test
     end
   end
 
+  def test_read_only_mode_uses_configuration
+    with_config(<<~YAML) do
+      read_only: true
+      pgbouncers:
+        local:
+          primary: {}
+    YAML
+      assert_predicate PgBouncerHero, :read_only?
+    end
+  end
+
+  def test_read_only_environment_setting_overrides_configuration
+    with_config(<<~YAML) do
+      read_only: true
+      pgbouncers:
+        local:
+          primary: {}
+    YAML
+      ENV["PGBOUNCERHERO_READ_ONLY"] = "off"
+
+      refute_predicate PgBouncerHero, :read_only?
+    ensure
+      ENV.delete("PGBOUNCERHERO_READ_ONLY")
+    end
+  end
+
+  def test_read_only_mode_rejects_invalid_values
+    ENV["PGBOUNCERHERO_READ_ONLY"] = "sometimes"
+
+    error = assert_raises(PgBouncerHero::ConfigurationError) { PgBouncerHero.read_only? }
+
+    assert_equal "read_only must be a boolean", error.message
+  ensure
+    ENV.delete("PGBOUNCERHERO_READ_ONLY")
+  end
+
   def test_groups_returns_hash
     ENV["PGBOUNCERHERO_DATABASE_URL"] = "postgres://user:pass@localhost:6432/pgbouncer"
     PgBouncerHero.reset!

@@ -10,6 +10,7 @@ PgBouncerHero is a Ruby gem that ships as a **Rails Engine** providing a web das
 
 - Ruby >= 3.2
 - Rails >= 7.2
+- PgBouncer >= 1.23
 
 ## Commands
 
@@ -36,7 +37,7 @@ bundle exec rake test:integration # Run real PgBouncer tests after docker compos
 - `lib/pgbouncerhero/connection.rb` — Wraps `PG.connect` with configurable timeout (default 5s, override via `PGBOUNCERHERO_TIMEOUT`), validates connections before reuse, and reconnects after failures.
 - `lib/pgbouncerhero/database.rb` — Parses a PgBouncer URL and owns a bounded, lazy connection pool per PgBouncer. Pool size and checkout timeout default to 5 and are configurable globally or per database.
 - `lib/pgbouncerhero/group.rb` — Collection of Database instances.
-- `lib/pgbouncerhero/methods/basics.rb` — Mixin executing PgBouncer admin commands.
+- `lib/pgbouncerhero/methods/basics.rb` — Mixin executing PgBouncer monitoring and process-control commands, including safe shutdown modes.
 
 ### Frontend Stack
 
@@ -48,7 +49,7 @@ bundle exec rake test:integration # Run real PgBouncer tests after docker compos
 ### Controllers (`app/controllers/pg_bouncer_hero/`)
 
 - `HomeController` — `index` renders overview of all groups/databases as cards.
-- `DatabaseController` — Per-database actions: `summary` (Turbo Frame), `databases`, `stats`, `pools`, `clients`, `conf`, `reload`, `suspend`, `shutdown`.
+- `DatabaseController` — Per-database monitoring and administrative actions. Administrative POST actions are blocked when read-only mode is enabled.
 
 ### JavaScript (`app/javascript/pgbouncerhero/`)
 
@@ -62,6 +63,7 @@ Routes are nested under `/:group/:database/` with constraints validating against
 ### Authentication
 
 Optional HTTP Basic Auth via `PGBOUNCERHERO_USERNAME` / `PGBOUNCERHERO_PASSWORD` env vars (only active when password is set). Also supports Devise `authenticate` block mounting.
+Optional read-only mode via top-level `read_only: true` or `PGBOUNCERHERO_READ_ONLY=true` hides and rejects all process-control commands.
 
 ## Key Conventions
 
@@ -76,7 +78,7 @@ Optional HTTP Basic Auth via `PGBOUNCERHERO_USERNAME` / `PGBOUNCERHERO_PASSWORD`
 - `test/dummy/` — Minimal Rails app for integration testing.
 - `test/test_helper.rb` — Loads dummy app and minitest.
 - Unit tests cover: version, configuration loading, groups, pooled connection lifecycle and concurrency, helpers, routing, and engine rendering.
-- `test/integration/` exercises real PgBouncer admin queries, summaries, reloads, authentication, reconnection, and concurrent pooled checkouts against the Docker Compose stack.
+- `test/integration/` exercises real PgBouncer admin queries, summaries, process controls, authentication, reconnection, and concurrent pooled checkouts against PgBouncer 1.23, 1.24, and 1.25 in CI.
 - Appraisal tests against Rails 7.2, 8.0, and 8.1.
 - CI runs Ruby 3.2/3.3/3.4/4.0 x Rails 7.2/8.0/8.1.
 
