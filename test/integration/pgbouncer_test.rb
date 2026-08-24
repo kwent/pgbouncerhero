@@ -121,6 +121,26 @@ class PgBouncerIntegrationTest < Minitest::Test
     assert_instance_of PG::Result, @database.stats
   end
 
+  def test_runs_database_scoped_maintenance_commands
+    paused = false
+    pause_result = @database.pause("app")
+    paused = true
+    resume_result = @database.resume("app")
+    paused = false
+    reconnect_result = @database.reconnect("app")
+    wait_close_result = @database.wait_close("app")
+
+    assert_equal [
+      PG::PGRES_COMMAND_OK,
+      PG::PGRES_COMMAND_OK,
+      PG::PGRES_COMMAND_OK,
+      PG::PGRES_COMMAND_OK
+    ], [ pause_result, resume_result, reconnect_result, wait_close_result ].map(&:result_status)
+    assert_instance_of PG::Result, @database.stats
+  ensure
+    @database.resume("app") if paused
+  end
+
   def test_rejects_invalid_credentials
     invalid_url = URI(URL).dup
     invalid_url.password = "incorrect"

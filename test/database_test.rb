@@ -197,6 +197,10 @@ class DatabaseTest < Minitest::Test
     @database.reload
     @database.suspend
     @database.resume
+    @database.pause("app")
+    @database.reconnect("app")
+    @database.wait_close("app")
+    @database.resume("app")
     @database.shutdown
     @database.shutdown(:immediate)
     @database.shutdown(:wait_for_clients)
@@ -207,11 +211,34 @@ class DatabaseTest < Minitest::Test
       "RELOAD",
       "SUSPEND",
       "RESUME",
+      'PAUSE "app"',
+      'RECONNECT "app"',
+      'WAIT_CLOSE "app"',
+      'RESUME "app"',
       "SHUTDOWN",
       "SHUTDOWN",
       "SHUTDOWN WAIT_FOR_CLIENTS",
       "SHUTDOWN WAIT_FOR_SERVERS"
     ], raw_connection.queries
+  end
+
+  def test_database_admin_commands_quote_database_names
+    raw_connection = FakeConnection.new
+    stub_connection_model(@database) { raw_connection }
+
+    @database.pause('app"; SHUTDOWN; "')
+
+    assert_equal [ 'PAUSE "app""; SHUTDOWN; """' ], raw_connection.queries
+  end
+
+  def test_database_admin_commands_reject_empty_database_names
+    raw_connection = FakeConnection.new
+    stub_connection_model(@database) { raw_connection }
+
+    error = assert_raises(ArgumentError) { @database.reconnect(nil) }
+
+    assert_equal "database name must not be empty", error.message
+    assert_empty raw_connection.queries
   end
 
   def test_shutdown_rejects_unknown_modes

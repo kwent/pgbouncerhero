@@ -20,6 +20,10 @@ PgBouncerHero::Engine.routes.draw do
       post :reload, controller: :database
       post :suspend, controller: :database
       post :resume, controller: :database
+      post :pause_database, controller: :database
+      post :reconnect_database, controller: :database
+      post :wait_close_database, controller: :database
+      post :resume_database, controller: :database
       post :shutdown, controller: :database
     end
   end

@@ -3,6 +3,7 @@
 **New:**
 - Servers and Users monitoring views for PgBouncer connection and user limits
 - Waiting-client pressure indicators on overview cards from pool `cl_waiting` counts
+- Database-scoped Pause, Reconnect, Wait close, and Resume maintenance controls
 
 ## 3.1.0 - 2026-08-23
 
