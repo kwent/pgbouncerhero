@@ -136,6 +136,10 @@ Set `read_only: true` at the top level of `config/pgbouncerhero.yml`, or set
 `PGBOUNCERHERO_READ_ONLY=true`, to hide and server-side reject every
 administrative command. The environment variable takes precedence over YAML.
 
+Monitoring views include Databases, Stats, Pools, Clients, Servers, Users,
+Configuration, and State. Overview cards also show a waiting-client indicator
+when any pool reports a nonzero `cl_waiting` count.
+
 ## Development
 
 Start PostgreSQL and PgBouncer with Docker:

@@ -33,6 +33,8 @@ class PgBouncerIntegrationTest < Minitest::Test
       lists: @database.lists,
       pools: @database.pools,
       clients: @database.clients,
+      servers: @database.servers,
+      users: @database.users,
       config: @database.conf,
       state: @database.state
     }
@@ -51,6 +53,10 @@ class PgBouncerIntegrationTest < Minitest::Test
     assert database_details
     assert_includes database_details.fetch(:databases_details).map { |row| row.fetch("name") }, "app"
     refute_includes database_details.fetch(:databases_details).map { |row| row.fetch("name") }, "pgbouncer"
+    pools_details = summary.find { |row| row.key?(:pools_details) }
+
+    assert pools_details
+    assert_respond_to pools_details.fetch(:pools_details), :each
   end
 
   def test_reconnects_after_the_connection_is_finished

@@ -13,6 +13,8 @@ PgBouncerHero::Engine.routes.draw do
       get :stats, controller: :database
       get :pools, controller: :database
       get :clients, controller: :database
+      get :servers, controller: :database
+      get :users, controller: :database
       get :conf, controller: :database
       get :state, controller: :database
       post :reload, controller: :database

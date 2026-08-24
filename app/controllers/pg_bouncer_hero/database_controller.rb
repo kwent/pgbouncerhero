@@ -42,6 +42,22 @@ module PgBouncerHero
       end
     end
 
+    def servers
+      if @database.connection
+        @servers = @database.servers
+      else
+        flash[:error] = "#{@database.name} does not look online."
+      end
+    end
+
+    def users
+      if @database.connection
+        @users = @database.users
+      else
+        flash[:error] = "#{@database.name} does not look online."
+      end
+    end
+
     def conf
       if @database.connection
         @conf = @database.conf

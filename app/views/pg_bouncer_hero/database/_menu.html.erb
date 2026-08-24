@@ -6,6 +6,8 @@
       <%= link_to "Stats", stats_path(database: database.name.parameterize), class: "px-3 py-1.5 text-sm rounded-md #{is_active('stats') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}" %>
       <%= link_to "Pools", pools_path(database: database.name.parameterize), class: "px-3 py-1.5 text-sm rounded-md #{is_active('pools') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}" %>
       <%= link_to "Clients", clients_path(database: database.name.parameterize), class: "px-3 py-1.5 text-sm rounded-md #{is_active('clients') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}" %>
+      <%= link_to "Servers", servers_path(database: database.name.parameterize), class: "px-3 py-1.5 text-sm rounded-md #{is_active('servers') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}" %>
+      <%= link_to "Users", users_path(database: database.name.parameterize), class: "px-3 py-1.5 text-sm rounded-md #{is_active('users') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}" %>
       <%= link_to "Configuration", conf_path(database: database.name.parameterize), class: "px-3 py-1.5 text-sm rounded-md #{is_active('conf') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}" %>
       <%= link_to "State", state_path(database: database.name.parameterize), class: "px-3 py-1.5 text-sm rounded-md #{is_active('state') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}" %>
     </div>
