@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 3.2.0 - 2026-08-24
+
 **New:**
 - Servers and Users monitoring views for PgBouncer connection and user limits
 - Waiting-client pressure indicators on overview cards from pool `cl_waiting` counts
