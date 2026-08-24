@@ -62,5 +62,13 @@ module PgBouncerHero
         Hash[mapped]
       end
     end
+
+    def disconnect!
+      @groups&.each_value do |group|
+        group.databases.each(&:disconnect!)
+      end
+    end
   end
 end
+
+at_exit { PgBouncerHero.disconnect! }
