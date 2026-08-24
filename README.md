@@ -148,11 +148,12 @@ Configuration, and State. Overview cards also show a waiting-client indicator
 when any pool reports a nonzero `cl_waiting` count. Monitoring pages refresh
 automatically every 60 seconds and include a manual Refresh control. Automatic
 polling pauses while the browser tab is hidden and refreshes immediately when
-the tab becomes visible again. Table views can be searched and their visible
-columns customized, with each table's choices remembered in local browser
-storage; identifier and maintenance columns remain visible while wide result
-sets scroll horizontally. Administrative controls adapt to the current
-PgBouncer and database state so contradictory actions are not shown.
+the tab becomes visible again. Table views can be searched, sorted by column,
+and customized, with each table's visible column choices remembered in local
+browser storage and resettable to their defaults. Identifier and maintenance
+columns remain visible while wide result sets scroll horizontally.
+Administrative controls adapt to the current PgBouncer and database state so
+contradictory actions are not shown.
 
 ## Development
 

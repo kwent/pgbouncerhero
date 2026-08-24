@@ -3,7 +3,10 @@
   <input id="<%= table_id %>_search" type="search" placeholder="Search <%= title.downcase %>…" class="w-56 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700" data-data-table-target="query" data-action="input->data-table#filter">
   <details class="relative text-sm text-gray-700">
     <summary class="cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-1.5 font-medium">Columns</summary>
-    <div class="absolute right-0 z-20 mt-2 grid w-max min-w-64 grid-cols-2 gap-x-4 gap-y-2 rounded-md border border-gray-200 bg-white p-3 text-xs shadow-lg" data-data-table-target="columnMenu"></div>
+    <div class="absolute right-0 z-20 mt-2 w-max min-w-64 rounded-md border border-gray-200 bg-white p-3 text-xs shadow-lg">
+      <div class="grid grid-cols-2 gap-x-4 gap-y-2" data-data-table-target="columnMenu"></div>
+      <button type="button" class="mt-3 w-full border-t border-gray-200 pt-2 text-left font-medium text-gray-600 hover:text-gray-900" data-action="data-table#resetColumns">Reset columns</button>
+    </div>
   </details>
   <span class="py-1.5 text-xs text-gray-500" data-data-table-target="status"><%= row_count %> rows</span>
 </div>
