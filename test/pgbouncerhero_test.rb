@@ -4,7 +4,7 @@ require "tmpdir"
 class PgBouncerHeroTest < Minitest::Test
   def test_version
     assert PgBouncerHero::VERSION
-    assert_equal "3.0.0", PgBouncerHero::VERSION
+    assert_equal "3.1.0", PgBouncerHero::VERSION
   end
 
   def test_config_returns_hash

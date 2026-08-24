@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-PgBouncerHero is a Ruby gem that ships as a **Rails Engine** providing a web dashboard for monitoring and managing one or multiple PgBouncer connection poolers. Version 3.0.0, MIT licensed.
+PgBouncerHero is a Ruby gem that ships as a **Rails Engine** providing a web dashboard for monitoring and managing one or multiple PgBouncer connection poolers. Version 3.1.0, MIT licensed.
 
 ## Requirements
 
