@@ -31,5 +31,32 @@ module PgBouncerHero
         end
       }.compact.reverse.join(" ")
     end
+
+    def monitoring_panel(&block)
+      frame_id = "monitoring_#{params[:action]}"
+
+      content_tag(:div,
+        data: {
+          controller: "polling",
+          polling_interval_value: 60_000,
+          action: "turbo:frame-load->polling#refreshed"
+        }) do
+        safe_join([
+          monitoring_refresh_controls,
+          turbo_frame_tag(frame_id, data: { polling_refresh_url: request.path }, &block)
+        ])
+      end
+    end
+
+    private
+
+    def monitoring_refresh_controls
+      content_tag(:div, class: "flex items-center justify-between gap-2 mb-3") do
+        safe_join([
+          content_tag(:span, "Updated just now", class: "text-xs text-gray-500", data: { polling_target: "status" }, aria: { live: "polite" }),
+          button_tag("Refresh", type: "button", class: "px-3 py-1.5 text-sm font-medium rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50", data: { action: "polling#refresh" })
+        ])
+      end
+    end
   end
 end

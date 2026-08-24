@@ -1,4 +1,6 @@
 <%= render partial: "menu", locals: {database: @database} %>
-<% if @servers %>
-  <%= render partial: "servers", locals: {database: @database, servers: @servers} %>
+<%= monitoring_panel do %>
+  <% if @servers %>
+    <%= render partial: "servers", locals: {database: @database, servers: @servers} %>
+  <% end %>
 <% end %>
