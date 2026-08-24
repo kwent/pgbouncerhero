@@ -1,34 +1,39 @@
-<div class="bg-white rounded-lg border border-gray-200 shadow-xs overflow-hidden">
-  <div class="px-4 py-3 border-b border-gray-200">
-    <h4 class="text-base font-semibold text-gray-900">Databases</h4>
+<div class="bg-white rounded-lg border border-gray-200 shadow-xs" data-controller="data-table" data-data-table-default-hidden-value='["force_user","min_pool_size","reserve_pool","server_lifetime","pool_mode","max_connections","paused","disabled"]'>
+  <div class="px-4 py-3 border-b border-gray-200 flex items-start justify-between gap-3 flex-wrap">
+    <h4 class="text-base font-semibold text-gray-900 py-1.5">Databases</h4>
+    <%= render "shared/data_table_toolbar", title: "Databases", table_id: "databases", row_count: databases.to_a.size %>
   </div>
-  <div class="overflow-x-auto">
+  <div class="overflow-x-auto rounded-b-lg">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
-          <% databases.first.keys.each do |key| %>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= key.titleize %></th>
+          <% databases.first.keys.each_with_index do |key, index| %>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider <%= "sticky left-0 z-10 bg-gray-50" if index.zero? %>" data-column-key="<%= key %>"><%= key.titleize %></th>
           <% end %>
           <% unless PgBouncerHero.read_only? %>
-            <th class="sticky right-0 z-10 min-w-52 bg-gray-50 px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Maintenance</th>
+            <th class="sticky right-0 z-10 min-w-52 bg-gray-50 px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-column-key="maintenance" data-column-locked="true">Maintenance</th>
           <% end %>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <% databases.each do |row| %>
-          <tr class="group hover:bg-gray-50">
-            <% row.each_value do |value| %>
-              <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"><%= value %></td>
+          <tr class="group hover:bg-gray-50" data-data-table-target="row">
+            <% row.each_value.with_index do |value, index| %>
+              <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap <%= "sticky left-0 bg-white group-hover:bg-gray-50" if index.zero? %>"><%= value %></td>
             <% end %>
             <% unless PgBouncerHero.read_only? %>
               <td class="sticky right-0 min-w-52 bg-white px-4 py-2 whitespace-nowrap group-hover:bg-gray-50">
                 <% target_database = row["name"].to_s %>
                 <% unless target_database == "pgbouncer" %>
                   <div class="grid grid-cols-2 gap-2">
-                    <%= button_to "Pause", pause_database_path(database: database.name.parameterize), method: :post, params: { target_database: target_database }, class: "w-full px-2 py-1 text-xs font-medium rounded-md border border-amber-300 text-amber-800 hover:bg-amber-50", form: { data: { turbo_confirm: "Pause #{target_database}? New client queries will wait until this database is resumed." } } %>
+                    <% if row["paused"].to_i.zero? %>
+                      <%= button_to "Pause", pause_database_path(database: database.name.parameterize), method: :post, params: { target_database: target_database }, class: "w-full px-2 py-1 text-xs font-medium rounded-md border border-amber-300 text-amber-800 hover:bg-amber-50", form: { data: { turbo_confirm: "Pause #{target_database}? New client queries will wait until this database is resumed." } } %>
+                    <% end %>
                     <%= button_to "Reconnect", reconnect_database_path(database: database.name.parameterize), method: :post, params: { target_database: target_database }, class: "w-full px-2 py-1 text-xs font-medium rounded-md border border-blue-300 text-blue-700 hover:bg-blue-50", form: { data: { turbo_confirm: "Reconnect released server connections for #{target_database}?" } } %>
                     <%= button_to "Wait close", wait_close_database_path(database: database.name.parameterize), method: :post, params: { target_database: target_database }, class: "w-full px-2 py-1 text-xs font-medium rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50", form: { data: { turbo_confirm: "Wait until all marked server connections for #{target_database} have closed?" } } %>
-                    <%= button_to "Resume", resume_database_path(database: database.name.parameterize), method: :post, params: { target_database: target_database }, class: "w-full px-2 py-1 text-xs font-medium rounded-md border border-green-300 text-green-700 hover:bg-green-50", form: { data: { turbo_confirm: "Resume client processing for #{target_database}?" } } %>
+                    <% if row["paused"].to_i.positive? %>
+                      <%= button_to "Resume", resume_database_path(database: database.name.parameterize), method: :post, params: { target_database: target_database }, class: "w-full px-2 py-1 text-xs font-medium rounded-md border border-green-300 text-green-700 hover:bg-green-50", form: { data: { turbo_confirm: "Resume client processing for #{target_database}?" } } %>
+                    <% end %>
                   </div>
                 <% end %>
               </td>
