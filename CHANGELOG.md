@@ -10,6 +10,7 @@
 - Complete the Tailwind CSS 4 migration and verify the committed stylesheet stays current in CI
 - Search monitoring tables, remember visible column choices, and keep identifier and maintenance columns visible while scrolling
 - Show only the administrative actions that apply to the current PgBouncer or database state
+- Sort monitoring results by any data column and reset saved column choices to their defaults
 
 ## 3.1.0 - 2026-08-23
 

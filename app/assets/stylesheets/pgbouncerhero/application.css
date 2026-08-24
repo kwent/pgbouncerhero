@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../../../views";
 @source "../../../helpers";
+@source "../../../javascript";
 
 @layer base {
   button:not(:disabled),

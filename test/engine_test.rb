@@ -182,6 +182,7 @@ class EngineTest < ActionDispatch::IntegrationTest
       assert_select "div[data-controller='data-table']", count: 1
       assert_select "input[type='search'][data-data-table-target='query']", count: 1
       assert_select "div[data-data-table-target='columnMenu']", count: 1
+      assert_select "button[data-action='data-table#resetColumns']", text: "Reset columns", count: 1
       assert_select "tr[data-data-table-target='row']", count: 1
       assert_select "th[data-column-key='database']", count: 1
     end
