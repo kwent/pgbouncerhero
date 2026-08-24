@@ -51,10 +51,10 @@ module PgBouncerHero
     private
 
     def monitoring_refresh_controls
-      content_tag(:div, class: "flex items-center justify-end gap-3 mb-3") do
+      content_tag(:div, class: "flex items-center justify-between gap-2 mb-3") do
         safe_join([
           content_tag(:span, "Updated just now", class: "text-xs text-gray-500", data: { polling_target: "status" }, aria: { live: "polite" }),
-          button_tag("Refresh", type: "button", class: "px-3 py-1.5 text-sm font-medium rounded-md border border-gray-300 text-gray-700 hover:bg-white", data: { action: "polling#refresh" })
+          button_tag("Refresh", type: "button", class: "px-3 py-1.5 text-sm font-medium rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50", data: { action: "polling#refresh" })
         ])
       end
     end
