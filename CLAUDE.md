@@ -26,6 +26,11 @@ bundle exec appraisal rake test  # Run tests across Rails versions
 bundle exec rake test:integration # Run real PgBouncer tests after docker compose up -d --wait
 ```
 
+Releases run through `.github/workflows/release.yml` using RubyGems trusted
+publishing. The workflow is manually dispatched from `master` with the version
+already committed in `lib/pgbouncerhero/version.rb`; it verifies the suite,
+publishes the gem, pushes the tag, and creates the GitHub release.
+
 ## Architecture
 
 **Rails Engine** mounted into a host app via `mount PgBouncerHero::Engine, at: "pgbouncerhero"`. Uses `isolate_namespace PgBouncerHero`.

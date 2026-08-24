@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version already committed on master (for example, 3.1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+      - name: Read gem version
+        id: gem
+        run: echo "version=$(ruby -Ilib -rpgbouncerhero/version -e 'puts PgBouncerHero::VERSION')" >> "$GITHUB_OUTPUT"
+      - name: Verify requested version
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+          GEM_VERSION: ${{ steps.gem.outputs.version }}
+        run: |
+          if [ "$REQUESTED_VERSION" != "$GEM_VERSION" ]; then
+            echo "::error::Requested $REQUESTED_VERSION but master contains $GEM_VERSION"
+            exit 1
+          fi
+      - name: Verify release
+        run: bundle exec rake
+      - uses: rubygems/release-gem@7f9650160c1a4e7989fdc9855807bdbd421d8b6b # v1.4.1
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GEM_VERSION: ${{ steps.gem.outputs.version }}
+        run: gh release create "v${GEM_VERSION}" --verify-tag --generate-notes --title "${GEM_VERSION}"
