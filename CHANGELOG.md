@@ -1,6 +1,8 @@
 ## Unreleased
 
 **New:**
+- Bounded, thread-safe connection pools per PgBouncer with configurable size and checkout timeout
+- Explicit `Database#with_connection` leases for running multiple commands on one connection
 - Real PgBouncer integration coverage for admin queries, summaries, reloads, authentication, and reconnection
 - A dedicated CI integration job backed by the repository's Docker Compose stack
 - Configurable `PgBouncerHero.config_path`, resolved from the host application's `Rails.root` by default
@@ -8,9 +10,10 @@
 - Request-level engine coverage and gem-package validation in CI
 
 **Improved:**
+- Reconnect stale or failed pooled connections automatically and close every pool on reset
 - Pin PostgreSQL and PgBouncer development images and wait for container health before testing
 - Let Dependabot maintain Docker image versions alongside gems and GitHub Actions
-- Serialize commands per database so a memoized PG connection is not used concurrently
+- Protect PgBouncer connections from concurrent use while allowing bounded parallel queries
 - Resolve parameterized group and database names consistently in routes and controllers
 - Load Rails engine dependencies explicitly and declare Propshaft as a runtime dependency
 - Cache Appraisal dependencies directly in the Ruby/Rails CI matrix

@@ -33,8 +33,8 @@ bundle exec rake test:integration # Run real PgBouncer tests after docker compos
 
 - `lib/pgbouncerhero.rb` — Entry point. Loads config from the host application's `config/pgbouncerhero.yml` (ERB-parsed YAML with `YAML.safe_load`) or `PGBOUNCERHERO_DATABASE_URL`. Exposes `.groups`, `.config_path`, `.reset!`, and `.importmap`. Config and groups are cached at module level.
 - `lib/pgbouncerhero/engine.rb` — Registers asset paths for Propshaft, sets up importmap, configures time zone.
-- `lib/pgbouncerhero/connection.rb` — Wraps `PG.connect` with configurable timeout (default 5s, override via `PGBOUNCERHERO_TIMEOUT`). Returns `nil` on connection failure.
-- `lib/pgbouncerhero/database.rb` — Parses a PgBouncer URL, lazily creates a Connection, reconnects stale connections, and serializes commands per database.
+- `lib/pgbouncerhero/connection.rb` — Wraps `PG.connect` with configurable timeout (default 5s, override via `PGBOUNCERHERO_TIMEOUT`), validates connections before reuse, and reconnects after failures.
+- `lib/pgbouncerhero/database.rb` — Parses a PgBouncer URL and owns a bounded, lazy connection pool per PgBouncer. Pool size and checkout timeout default to 5 and are configurable globally or per database.
 - `lib/pgbouncerhero/group.rb` — Collection of Database instances.
 - `lib/pgbouncerhero/methods/basics.rb` — Mixin executing PgBouncer admin commands.
 
@@ -75,8 +75,8 @@ Optional HTTP Basic Auth via `PGBOUNCERHERO_USERNAME` / `PGBOUNCERHERO_PASSWORD`
 
 - `test/dummy/` — Minimal Rails app for integration testing.
 - `test/test_helper.rb` — Loads dummy app and minitest.
-- Unit tests cover: version, configuration loading, groups, connection lifecycle and serialization, helpers, routing, and engine rendering.
-- `test/integration/` exercises real PgBouncer admin queries, summaries, reloads, authentication, and reconnection against the Docker Compose stack.
+- Unit tests cover: version, configuration loading, groups, pooled connection lifecycle and concurrency, helpers, routing, and engine rendering.
+- `test/integration/` exercises real PgBouncer admin queries, summaries, reloads, authentication, reconnection, and concurrent pooled checkouts against the Docker Compose stack.
 - Appraisal tests against Rails 7.2, 8.0, and 8.1.
 - CI runs Ruby 3.2/3.3/3.4/4.0 x Rails 7.2/8.0/8.1.
 

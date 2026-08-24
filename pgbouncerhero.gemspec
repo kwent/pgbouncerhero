@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "turbo-rails", ">= 1.0", "< 3"
   spec.add_dependency "stimulus-rails", ">= 1.0", "< 2"
   spec.add_dependency "pg", ">= 1.2", "< 2"
+  spec.add_dependency "connection_pool", ">= 3.0", "< 4"
 
   spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "tailwindcss-rails", "~> 4.0"

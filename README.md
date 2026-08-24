@@ -69,6 +69,8 @@ pgbouncers:
   production:
     primary:
       url: <%= ENV["PGBOUNCER_PRODUCTION_PRIMARY_DATABASE_URL"] %>
+      pool_size: 5
+      pool_timeout: 5
     replica:
       url: <%= ENV["PGBOUNCER_PRODUCTION_REPLICA_DATABASE_URL"] %>
   staging:
@@ -93,6 +95,27 @@ to be closed. Stale connections reconnect automatically.
 
 The PostgreSQL connection timeout defaults to five seconds and can be changed
 with `PGBOUNCERHERO_TIMEOUT`.
+
+PgBouncerHero keeps a bounded, lazily created connection pool for each
+configured PgBouncer. The pool defaults to five connections with a five-second
+checkout timeout. Set `PGBOUNCERHERO_POOL_SIZE` and
+`PGBOUNCERHERO_POOL_TIMEOUT` to change the defaults for every PgBouncer, or set
+`pool_size` and `pool_timeout` on an individual database entry as shown above.
+Per-database settings take precedence over environment variables.
+
+Code that needs to issue multiple commands on the same PostgreSQL connection
+can lease one explicitly:
+
+```ruby
+database.with_connection do |connection|
+  connection.exec("SHOW VERSION")
+  connection.exec("SHOW CONFIG")
+end
+```
+
+`database.connection` remains available as a connection-compatible proxy for
+existing integrations. Connections are checked when borrowed, and stale or
+failed connections are discarded and recreated automatically.
 
 ## Development
 
