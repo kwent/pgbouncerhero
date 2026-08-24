@@ -5,7 +5,15 @@ require "rubocop/rake_task"
 Rake::TestTask.new(:test) do |t|
   t.libs << "test"
   t.libs << "lib"
-  t.test_files = FileList["test/**/*_test.rb"]
+  t.test_files = FileList["test/**/*_test.rb"].exclude("test/integration/**/*")
+end
+
+namespace :test do
+  Rake::TestTask.new(:integration) do |t|
+    t.libs << "test"
+    t.libs << "lib"
+    t.test_files = FileList["test/integration/**/*_test.rb"]
+  end
 end
 
 RuboCop::RakeTask.new

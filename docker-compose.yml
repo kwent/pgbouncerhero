@@ -1,18 +1,23 @@
 services:
   postgres:
-    image: postgres:17
+    image: postgres:17.11-alpine
     environment:
       POSTGRES_USER: pgbouncer
       POSTGRES_PASSWORD: pgbouncer
       POSTGRES_DB: app
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pgbouncer -d app"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
 
   pgbouncer:
-    image: edoburu/pgbouncer:latest
+    image: edoburu/pgbouncer:v1.25.2-p0
     environment:
       DATABASE_URL: postgres://pgbouncer:pgbouncer@postgres:5432/app
-      AUTH_TYPE: trust
+      AUTH_TYPE: scram-sha-256
       IGNORE_STARTUP_PARAMETERS: extra_float_digits
       ADMIN_USERS: pgbouncer
       MAX_CLIENT_CONN: 100
@@ -20,4 +25,10 @@ services:
     ports:
       - "6432:5432"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U pgbouncer -d pgbouncer"]
+      interval: 2s
+      timeout: 5s
+      retries: 15

@@ -22,6 +22,7 @@ bundle exec rake              # Run all (test + rubocop + herb:lint)
 gem build pgbouncerhero.gemspec  # Build the gem
 bundle exec appraisal install    # Install Appraisal gemfiles
 bundle exec appraisal rake test  # Run tests across Rails versions
+bundle exec rake test:integration # Run real PgBouncer tests after docker compose up -d --wait
 ```
 
 ## Architecture
@@ -74,7 +75,8 @@ Optional HTTP Basic Auth via `PGBOUNCERHERO_USERNAME` / `PGBOUNCERHERO_PASSWORD`
 
 - `test/dummy/` — Minimal Rails app for integration testing.
 - `test/test_helper.rb` — Loads dummy app and minitest.
-- Tests cover: version, configuration loading, groups, connection lifecycle and serialization, helpers, routing, and engine rendering.
+- Unit tests cover: version, configuration loading, groups, connection lifecycle and serialization, helpers, routing, and engine rendering.
+- `test/integration/` exercises real PgBouncer admin queries, summaries, reloads, authentication, and reconnection against the Docker Compose stack.
 - Appraisal tests against Rails 7.2, 8.0, and 8.1.
 - CI runs Ruby 3.2/3.3/3.4/4.0 x Rails 7.2/8.0/8.1.
 
