@@ -7,6 +7,7 @@
 
 **Improved:**
 - Refresh every monitoring view automatically, with manual refresh and background-tab pausing
+- Complete the Tailwind CSS 4 migration and verify the committed stylesheet stays current in CI
 
 ## 3.1.0 - 2026-08-23
 
