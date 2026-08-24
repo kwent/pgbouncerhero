@@ -122,6 +122,14 @@ module PgBouncerHero
     def ensure_writable!
       return unless @database.read_only?
 
+      ActiveSupport::Notifications.instrument(
+        PgBouncerHero::ADMIN_COMMAND_EVENT,
+        group: @database.group.name,
+        database: @database.name,
+        action: action_name.delete_suffix("_database").to_sym,
+        target_database: params[:target_database].presence,
+        outcome: :denied
+      )
       render plain: "PgBouncerHero is configured as read-only.", status: :forbidden
     end
 
@@ -133,8 +141,7 @@ module PgBouncerHero
     end
 
     def execute_admin_command(command, past_tense, *arguments)
-      if @database.connection
-        @database.public_send(command, *arguments)
+      if @database.public_send(command, *arguments)
         flash[:success] = "#{@database.name} has been #{past_tense}."
       else
         flash[:error] = "#{@database.name} does not look online."
@@ -146,8 +153,7 @@ module PgBouncerHero
     end
 
     def execute_database_admin_command(command, past_tense)
-      if @database.connection
-        @database.public_send(command, @target_database)
+      if @database.public_send(command, @target_database)
         flash[:success] = "#{@target_database} on #{@database.name} has been #{past_tense}."
       else
         flash[:error] = "#{@database.name} does not look online."

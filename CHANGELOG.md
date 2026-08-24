@@ -12,6 +12,7 @@
 - Show only the administrative actions that apply to the current PgBouncer or database state
 - Sort monitoring results by any data column and reset saved column choices to their defaults
 - Configure read-only administration independently for each PgBouncer, with the environment variable retained as a global override
+- Emit structured Active Support notifications for successful, unavailable, failed, and policy-denied administrative commands
 
 ## 3.1.0 - 2026-08-23
 

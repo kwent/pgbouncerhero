@@ -231,14 +231,73 @@ class DatabaseTest < Minitest::Test
     assert_equal [ 'PAUSE "app""; SHUTDOWN; """' ], raw_connection.queries
   end
 
+  def test_admin_commands_emit_successful_audit_events
+    raw_connection = FakeConnection.new
+    stub_connection_model(@database) { raw_connection }
+
+    events = capture_admin_command_events { @database.pause("app") }
+    event = events.fetch(0)
+
+    assert_equal 1, events.size
+    assert_equal "test_group", event.payload.fetch(:group)
+    assert_equal "primary", event.payload.fetch(:database)
+    assert_equal :pause, event.payload.fetch(:action)
+    assert_equal "app", event.payload.fetch(:target_database)
+    assert_equal :success, event.payload.fetch(:outcome)
+    assert_operator event.duration, :>=, 0
+    refute event.payload.key?(:error_class)
+  end
+
+  def test_unavailable_admin_commands_emit_audit_events
+    database = build_database({})
+
+    events = capture_admin_command_events { assert_nil database.reload }
+
+    assert_equal :reload, events.fetch(0).payload.fetch(:action)
+    assert_equal :unavailable, events.fetch(0).payload.fetch(:outcome)
+  end
+
+  def test_failed_admin_commands_emit_error_classes_without_messages
+    @database.define_singleton_method(:execute) { |_command| raise PG::ConnectionBad, "private database detail" }
+
+    events = capture_admin_command_events do
+      assert_raises(PG::ConnectionBad) { @database.reload }
+    end
+    payload = events.fetch(0).payload
+
+    assert_equal :error, payload.fetch(:outcome)
+    assert_equal "PG::ConnectionBad", payload.fetch(:error_class)
+    refute_includes payload.values, "private database detail"
+    refute payload.key?(:exception)
+    refute payload.key?(:exception_object)
+  end
+
+  def test_shutdown_audit_events_include_the_mode
+    raw_connection = FakeConnection.new
+    stub_connection_model(@database) { raw_connection }
+
+    events = capture_admin_command_events { @database.shutdown(:wait_for_clients) }
+
+    assert_equal :shutdown, events.fetch(0).payload.fetch(:action)
+    assert_equal :wait_for_clients, events.fetch(0).payload.fetch(:mode)
+    assert_equal :success, events.fetch(0).payload.fetch(:outcome)
+  end
+
   def test_database_admin_commands_reject_empty_database_names
     raw_connection = FakeConnection.new
     stub_connection_model(@database) { raw_connection }
 
-    error = assert_raises(ArgumentError) { @database.reconnect(nil) }
+    events = capture_admin_command_events do
+      error = assert_raises(ArgumentError) { @database.reconnect(nil) }
 
-    assert_equal "database name must not be empty", error.message
+      assert_equal "database name must not be empty", error.message
+    end
+
     assert_empty raw_connection.queries
+    assert_equal :reconnect, events.fetch(0).payload.fetch(:action)
+    assert_equal "", events.fetch(0).payload.fetch(:target_database)
+    assert_equal :error, events.fetch(0).payload.fetch(:outcome)
+    assert_equal "ArgumentError", events.fetch(0).payload.fetch(:error_class)
   end
 
   def test_shutdown_rejects_unknown_modes

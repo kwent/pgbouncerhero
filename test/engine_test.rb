@@ -119,10 +119,15 @@ class EngineTest < ActionDispatch::IntegrationTest
       assert_select "form[action$='/shutdown']", count: 0
 
       authenticity_token = css_select("meta[name='csrf-token']").first["content"]
-      post "/pgbouncerhero/operations/primary/reload", params: { authenticity_token: authenticity_token }
+      events = capture_admin_command_events do
+        post "/pgbouncerhero/operations/primary/reload", params: { authenticity_token: authenticity_token }
+      end
 
       assert_response :forbidden
       assert_equal "PgBouncerHero is configured as read-only.", response.body
+      assert_equal :reload, events.fetch(0).payload.fetch(:action)
+      assert_equal :denied, events.fetch(0).payload.fetch(:outcome)
+      assert_nil events.fetch(0).payload.fetch(:target_database)
     end
   end
 
@@ -159,6 +164,25 @@ class EngineTest < ActionDispatch::IntegrationTest
     end
   end
 
+  def test_unavailable_dashboard_admin_commands_emit_audit_events
+    with_config(<<~YAML) do
+      pgbouncers:
+        Operations:
+          Primary: {}
+    YAML
+      get "/pgbouncerhero/operations/primary/state"
+      authenticity_token = css_select("meta[name='csrf-token']").first["content"]
+
+      events = capture_admin_command_events do
+        post "/pgbouncerhero/operations/primary/reload", params: { authenticity_token: authenticity_token }
+      end
+
+      assert_response :redirect
+      assert_equal :reload, events.fetch(0).payload.fetch(:action)
+      assert_equal :unavailable, events.fetch(0).payload.fetch(:outcome)
+    end
+  end
+
   def test_read_only_mode_hides_and_blocks_database_maintenance_controls
     rows = [ { "name" => "app", "paused" => "0" }, { "name" => "pgbouncer", "paused" => "0" } ]
     with_stubbed_database_methods({ databases: rows }, read_only: true) do
@@ -169,11 +193,16 @@ class EngineTest < ActionDispatch::IntegrationTest
       assert_select "form[action$='/pause_database']", count: 0
       authenticity_token = css_select("meta[name='csrf-token']").first["content"]
 
-      post "/pgbouncerhero/operations/primary/pause_database",
-        params: { authenticity_token: authenticity_token, target_database: "app" }
+      events = capture_admin_command_events do
+        post "/pgbouncerhero/operations/primary/pause_database",
+          params: { authenticity_token: authenticity_token, target_database: "app" }
+      end
 
       assert_response :forbidden
       assert_equal "PgBouncerHero is configured as read-only.", response.body
+      assert_equal :pause, events.fetch(0).payload.fetch(:action)
+      assert_equal "app", events.fetch(0).payload.fetch(:target_database)
+      assert_equal :denied, events.fetch(0).payload.fetch(:outcome)
     end
   end
 

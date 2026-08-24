@@ -45,6 +45,7 @@ release.
 - `lib/pgbouncerhero/database.rb` — Parses a PgBouncer URL and owns a bounded, lazy connection pool per PgBouncer. Pool size and checkout timeout default to 5 and are configurable globally or per database.
 - `lib/pgbouncerhero/group.rb` — Collection of Database instances.
 - `lib/pgbouncerhero/methods/basics.rb` — Mixin executing PgBouncer monitoring and process-control commands, including safe shutdown modes.
+  Administrative commands emit structured `admin_command.pgbouncerhero` Active Support notifications for host-app auditing.
 
 ### Frontend Stack
 
