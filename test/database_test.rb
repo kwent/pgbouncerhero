@@ -4,8 +4,9 @@ class DatabaseTest < Minitest::Test
   class FakeConnection
     attr_reader :finish_calls, :queries
 
-    def initialize(tracker: nil)
+    def initialize(tracker: nil, responses: {})
       @tracker = tracker
+      @responses = responses
       @finish_calls = 0
       @queries = []
       @finished = false
@@ -28,7 +29,7 @@ class DatabaseTest < Minitest::Test
       @tracker&.enter
       sleep 0.02 if @tracker
       @queries << query
-      []
+      @responses.fetch(query, [])
     ensure
       @tracker&.leave
     end
@@ -151,6 +152,41 @@ class DatabaseTest < Minitest::Test
 
     assert_equal 1, connections.size
     assert_equal [ "SHOW stats", "SHOW stats" ], connections.first.queries
+  end
+
+  def test_servers_and_users_use_the_same_idle_connection
+    connections = []
+    stub_connection_model(@database) { FakeConnection.new.tap { |connection| connections << connection } }
+
+    @database.servers
+    @database.users
+
+    assert_equal 1, connections.size
+    assert_equal [ "SHOW servers", "SHOW users" ], connections.first.queries
+  end
+
+  def test_summary_includes_database_and_pool_details
+    responses = {
+      "SHOW lists" => [
+        { "list" => "users", "items" => "1" },
+        { "list" => "databases", "items" => "2" },
+        { "list" => "pools", "items" => "1" }
+      ],
+      "SHOW databases" => [
+        { "name" => "app", "current_connections" => "1", "max_connections" => "10" },
+        { "name" => "pgbouncer", "current_connections" => "0", "max_connections" => "0" }
+      ],
+      "SHOW pools" => [ { "cl_waiting" => "2" } ]
+    }
+    raw_connection = FakeConnection.new(responses: responses)
+    stub_connection_model(@database) { raw_connection }
+
+    summary = @database.summary
+
+    assert_equal responses.fetch("SHOW lists"), summary.first(3)
+    assert_equal [ responses.fetch("SHOW databases").first ], summary.find { |row| row.key?(:databases_details) }.fetch(:databases_details)
+    assert_equal responses.fetch("SHOW pools"), summary.find { |row| row.key?(:pools_details) }.fetch(:pools_details)
+    assert_equal [ "SHOW lists", "SHOW databases", "SHOW pools" ], raw_connection.queries
   end
 
   def test_admin_commands_use_supported_pgbouncer_syntax

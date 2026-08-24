@@ -1,5 +1,8 @@
 <% if database.connection %>
   <% summary = database.summary %>
+  <% pools_details_row = summary.find { |row| row.key?(:pools_details) || row.key?("pools_details") } %>
+  <% pools_details = pools_details_row ? (pools_details_row[:pools_details] || pools_details_row["pools_details"] || []) : [] %>
+  <% waiting_clients = Array(pools_details).sum { |pool| pool["cl_waiting"].to_i } %>
   <div class="px-4 py-3 flex items-start gap-6">
     <div class="space-y-1 text-sm text-gray-700">
       <div>
@@ -13,6 +16,13 @@
       <div>
         <% number = summary.select { |row| row["list"] == "pools" }.first["items"].to_i - 1 %>
         <%= pluralize(number, "pool") %>
+      </div>
+      <div>
+        <% if waiting_clients.positive? %>
+          <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-200 ring-inset"><%= pluralize(waiting_clients, "waiting client") %></span>
+        <% else %>
+          <span class="text-xs text-gray-400">No clients waiting</span>
+        <% end %>
       </div>
     </div>
     <div class="flex-1 space-y-2">

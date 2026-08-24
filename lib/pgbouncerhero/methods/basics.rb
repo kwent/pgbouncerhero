@@ -12,9 +12,12 @@ module PgBouncerHero
         if connection
           l = lists
           d = databases
+          p = pools
           l = l.as_json
           d = d.as_json.reject { |a| a["name"] == "pgbouncer" }
+          p = p.as_json
           l.push({ databases_details: d })
+          l.push({ pools_details: p })
           l
         end
       end
@@ -32,6 +35,12 @@ module PgBouncerHero
       end
       def clients
         execute("SHOW clients")
+      end
+      def servers
+        execute("SHOW servers")
+      end
+      def users
+        execute("SHOW users")
       end
       def conf
         execute("SHOW config")
