@@ -10,7 +10,7 @@
           <% databases.first.keys.each_with_index do |key, index| %>
             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider <%= "sticky left-0 z-10 bg-gray-50" if index.zero? %>" data-column-key="<%= key %>"><%= key.titleize %></th>
           <% end %>
-          <% unless PgBouncerHero.read_only? %>
+          <% unless database.read_only? %>
             <th class="sticky right-0 z-10 min-w-52 bg-gray-50 px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-column-key="maintenance" data-column-locked="true">Maintenance</th>
           <% end %>
         </tr>
@@ -21,7 +21,7 @@
             <% row.each_value.with_index do |value, index| %>
               <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap <%= "sticky left-0 bg-white group-hover:bg-gray-50" if index.zero? %>"><%= value %></td>
             <% end %>
-            <% unless PgBouncerHero.read_only? %>
+            <% unless database.read_only? %>
               <td class="sticky right-0 min-w-52 bg-white px-4 py-2 whitespace-nowrap group-hover:bg-gray-50">
                 <% target_database = row["name"].to_s %>
                 <% unless target_database == "pgbouncer" %>

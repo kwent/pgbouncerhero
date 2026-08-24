@@ -15,7 +15,7 @@
       <%= link_to "State", state_path(database: database.name.parameterize), class: "px-3 py-1.5 text-sm rounded-md #{is_active('state') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}" %>
     </div>
     <div class="flex items-center gap-2">
-      <% if PgBouncerHero.read_only? %>
+      <% if database.read_only? %>
         <span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-300 ring-inset">Read-only</span>
       <% else %>
         <%= button_to "Reload", reload_path(database: database.name.parameterize), method: :post, class: "px-3 py-1.5 text-sm font-medium rounded-md border border-green-300 text-green-700 hover:bg-green-50", form: { data: { turbo_confirm: "Reload PgBouncer configuration?" } } %>

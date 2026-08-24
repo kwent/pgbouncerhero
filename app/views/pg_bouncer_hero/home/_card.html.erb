@@ -5,6 +5,9 @@
         <div class="text-base font-bold text-gray-900"><%= database.name %></div>
         <div class="text-xs text-gray-500"><%= database.host %></div>
       </div>
+      <% if database.read_only? %>
+        <span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-300 ring-inset">Read-only</span>
+      <% end %>
     </div>
   <% end %>
   <turbo-frame id="card_<%= database.group.name.parameterize %>_<%= database.name.parameterize %>" src="<%= summary_path(group: database.group.name.parameterize, database: database.name.parameterize) %>" loading="lazy">

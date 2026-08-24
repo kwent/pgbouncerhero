@@ -65,6 +65,10 @@ module PgBouncerHero
       @url.password if @url
     end
 
+    def read_only?
+      PgBouncerHero.read_only_for?(self)
+    end
+
     def dbname
       @url.path[1..-1] if @url
     end

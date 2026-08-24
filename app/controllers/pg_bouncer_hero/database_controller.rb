@@ -120,7 +120,7 @@ module PgBouncerHero
     end
 
     def ensure_writable!
-      return unless PgBouncerHero.read_only?
+      return unless @database.read_only?
 
       render plain: "PgBouncerHero is configured as read-only.", status: :forbidden
     end

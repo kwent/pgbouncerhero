@@ -126,6 +126,39 @@ class EngineTest < ActionDispatch::IntegrationTest
     end
   end
 
+  def test_database_read_only_policy_hides_controls_and_blocks_admin_commands
+    with_stubbed_database_methods({}, database_read_only: true) do
+      get "/pgbouncerhero"
+
+      assert_response :success
+      assert_select "span", text: "Read-only", count: 1
+
+      get "/pgbouncerhero/operations/primary/state"
+
+      assert_response :success
+      assert_select "span", "Read-only"
+      assert_select "form[action$='/reload']", count: 0
+      authenticity_token = css_select("meta[name='csrf-token']").first["content"]
+
+      post "/pgbouncerhero/operations/primary/reload", params: { authenticity_token: authenticity_token }
+
+      assert_response :forbidden
+      assert_equal "PgBouncerHero is configured as read-only.", response.body
+    end
+  end
+
+  def test_database_writable_policy_overrides_the_top_level_default
+    rows = [ { "name" => "app", "paused" => "0" }, { "name" => "pgbouncer", "paused" => "0" } ]
+    with_stubbed_database_methods({ databases: rows }, read_only: true, database_read_only: false) do
+      get "/pgbouncerhero/operations/primary/databases"
+
+      assert_response :success
+      assert_select "span", text: "Read-only", count: 0
+      assert_select "th", text: "Maintenance", count: 1
+      assert_select "form[action$='/pause_database']", count: 1
+    end
+  end
+
   def test_read_only_mode_hides_and_blocks_database_maintenance_controls
     rows = [ { "name" => "app", "paused" => "0" }, { "name" => "pgbouncer", "paused" => "0" } ]
     with_stubbed_database_methods({ databases: rows }, read_only: true) do
@@ -271,13 +304,15 @@ class EngineTest < ActionDispatch::IntegrationTest
     with_stubbed_database_methods({ method => result }) { yield }
   end
 
-  def with_stubbed_database_methods(results, read_only: false)
+  def with_stubbed_database_methods(results, read_only: false, database_read_only: nil)
+    database_setting = "read_only: #{database_read_only}" unless database_read_only.nil?
     with_config(<<~YAML) do
       read_only: #{read_only}
       pgbouncers:
         Operations:
           Primary:
             url: postgres://user:pass@localhost:6432/pgbouncer
+            #{database_setting}
     YAML
       database = PgBouncerHero.groups.fetch("operations").databases.first
       database.define_singleton_method(:connection) { true }

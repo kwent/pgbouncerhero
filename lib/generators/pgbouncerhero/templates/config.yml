@@ -5,6 +5,7 @@ pgbouncers:
       # url: <%%= ENV["PGBOUNCER_PRODUCTION_PRIMARY_DATABASE_URL"] %>
       # pool_size: 5
       # pool_timeout: 5
+      # read_only: true
     # Add more databases
     # replica:
     #   url: <%%= ENV["PGBOUNCER_PRODUCTION_REPLICA_DATABASE_URL"] %>
@@ -17,5 +18,6 @@ pgbouncers:
 # Time zone (defaults to app time zone)
 # time_zone: "Pacific Time (US & Canada)"
 
-# Hide and reject Reload, Suspend, Resume, and Shutdown commands
+# Hide and reject administrative commands for every PgBouncer unless an
+# individual PgBouncer sets read_only explicitly
 # read_only: true

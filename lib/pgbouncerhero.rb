@@ -79,6 +79,17 @@ module PgBouncerHero
 
     def read_only?
       value = ENV.fetch("PGBOUNCERHERO_READ_ONLY") { config.fetch("read_only", false) }
+      parse_read_only(value)
+    end
+
+    def read_only_for?(database)
+      value = ENV.fetch("PGBOUNCERHERO_READ_ONLY") do
+        database.config.fetch("read_only") { config.fetch("read_only", false) }
+      end
+      parse_read_only(value)
+    end
+
+    def parse_read_only(value)
       BOOLEAN_SETTINGS.fetch(value.is_a?(String) ? value.downcase : value)
     rescue KeyError
       raise ConfigurationError, "read_only must be a boolean"
@@ -99,6 +110,8 @@ module PgBouncerHero
         @groups = nil
       end
     end
+
+    private :parse_read_only
 
     private
 

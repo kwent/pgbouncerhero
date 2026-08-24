@@ -70,7 +70,7 @@ Routes are nested under `/:group/:database/` with constraints validating against
 ### Authentication
 
 Optional HTTP Basic Auth via `PGBOUNCERHERO_USERNAME` / `PGBOUNCERHERO_PASSWORD` env vars (only active when password is set). Also supports Devise `authenticate` block mounting.
-Optional read-only mode via top-level `read_only: true` or `PGBOUNCERHERO_READ_ONLY=true` hides and rejects all process-control commands.
+Optional read-only mode via top-level or per-PgBouncer `read_only: true` hides and rejects process-control commands. `PGBOUNCERHERO_READ_ONLY` is the highest-precedence global override.
 
 ## Key Conventions
 
