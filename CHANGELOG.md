@@ -5,6 +5,9 @@
 - Waiting-client pressure indicators on overview cards from pool `cl_waiting` counts
 - Database-scoped Pause, Reconnect, Wait close, and Resume maintenance controls
 
+**Improved:**
+- Refresh every monitoring view automatically, with manual refresh and background-tab pausing
+
 ## 3.1.0 - 2026-08-23
 
 **New:**

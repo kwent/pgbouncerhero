@@ -145,7 +145,10 @@ are quoted before being sent to the PgBouncer admin console.
 
 Monitoring views include Databases, Stats, Pools, Clients, Servers, Users,
 Configuration, and State. Overview cards also show a waiting-client indicator
-when any pool reports a nonzero `cl_waiting` count.
+when any pool reports a nonzero `cl_waiting` count. Monitoring pages refresh
+automatically every 60 seconds and include a manual Refresh control. Automatic
+polling pauses while the browser tab is hidden and refreshes immediately when
+the tab becomes visible again.
 
 ## Development
 

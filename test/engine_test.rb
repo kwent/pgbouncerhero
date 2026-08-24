@@ -49,6 +49,32 @@ class EngineTest < ActionDispatch::IntegrationTest
     end
   end
 
+  def test_monitoring_pages_render_refreshable_turbo_frames
+    results = {
+      databases: [ { "name" => "app" } ],
+      stats: [ { "database" => "app" } ],
+      pools: [ { "database" => "app" } ],
+      clients: [ { "database" => "app" } ],
+      servers: [ { "database" => "app" } ],
+      users: [ { "name" => "app" } ],
+      conf: [ { "key" => "pool_mode", "value" => "transaction" } ],
+      state: [ { "key" => "active" } ]
+    }
+
+    with_stubbed_database_methods(results) do
+      results.each_key do |action|
+        get "/pgbouncerhero/operations/primary/#{action}"
+
+        assert_response :success
+        assert_select "div[data-controller='polling'][data-polling-interval-value='60000']", count: 1
+        assert_select "turbo-frame#monitoring_#{action}[data-polling-refresh-url='/pgbouncerhero/operations/primary/#{action}']", count: 1
+        assert_select "turbo-frame#monitoring_#{action}[src]", count: 0
+        assert_select "button[data-action='polling#refresh']", text: "Refresh", count: 1
+        assert_select "span[data-polling-target='status']", text: "Updated just now", count: 1
+      end
+    end
+  end
+
   def test_overview_renders_no_clients_waiting_when_pool_pressure_is_zero
     with_stubbed_database_methods({ summary: overview_summary(0) }) do
       get "/pgbouncerhero/operations/primary/summary"
