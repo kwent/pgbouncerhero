@@ -1,53 +1,60 @@
 <% if database.connection %>
   <% summary = database.summary %>
-  <% pools_details_row = summary.find { |row| row.key?(:pools_details) || row.key?("pools_details") } %>
-  <% pools_details = pools_details_row ? (pools_details_row[:pools_details] || pools_details_row["pools_details"] || []) : [] %>
-  <% waiting_clients = Array(pools_details).sum { |pool| pool["cl_waiting"].to_i } %>
-  <div class="px-4 py-3 flex items-start gap-6">
-    <div class="space-y-1 text-sm text-gray-700">
-      <div>
-        <% number = summary.select { |row| row["list"] == "users" }.first["items"] %>
-        <%= pluralize(number, "user") %>
+  <% health = fleet_health(summary) %>
+  <div data-fleet-health data-status="<%= health[:status] %>" data-severity="<%= health[:severity] %>" data-waiting-clients="<%= health[:waiting_clients] %>" data-high-utilization="<%= health[:max_utilization] >= 80 %>">
+    <div class="px-4 py-3 flex items-start gap-6">
+      <div class="space-y-1 text-sm text-gray-700">
+        <div>
+          <% number = summary.select { |row| row["list"] == "users" }.first["items"] %>
+          <%= pluralize(number, "user") %>
+        </div>
+        <div>
+          <% number = summary.select { |row| row["list"] == "databases" }.first["items"].to_i - 1 %>
+          <%= pluralize(number, "database") %>
+        </div>
+        <div>
+          <% number = summary.select { |row| row["list"] == "pools" }.first["items"].to_i - 1 %>
+          <%= pluralize(number, "pool") %>
+        </div>
+        <div>
+          <% if health[:waiting_clients].positive? %>
+            <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-200 ring-inset"><%= pluralize(health[:waiting_clients], "waiting client") %></span>
+          <% else %>
+            <span class="text-xs text-gray-400">No clients waiting</span>
+          <% end %>
+        </div>
       </div>
-      <div>
-        <% number = summary.select { |row| row["list"] == "databases" }.first["items"].to_i - 1 %>
-        <%= pluralize(number, "database") %>
-      </div>
-      <div>
-        <% number = summary.select { |row| row["list"] == "pools" }.first["items"].to_i - 1 %>
-        <%= pluralize(number, "pool") %>
-      </div>
-      <div>
-        <% if waiting_clients.positive? %>
-          <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-200 ring-inset"><%= pluralize(waiting_clients, "waiting client") %></span>
-        <% else %>
-          <span class="text-xs text-gray-400">No clients waiting</span>
+      <div class="flex-1 space-y-2">
+        <% summary.select { |row| row.key?(:databases_details) }.first[:databases_details].each do |db| %>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="font-medium text-gray-900 w-24 truncate"><%= db["name"] %></span>
+            <div class="flex-1">
+              <% current = db["current_connections"].to_i %>
+              <% max = db["max_connections"].to_i %>
+              <% pct = max > 0 ? (current.to_f / max * 100).round : 0 %>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="<%= pct >= 80 ? "bg-amber-500" : "bg-green-500" %> h-2.5 rounded-full" style="width: <%= [pct, 100].min %>%"></div>
+              </div>
+              <div class="text-xs text-gray-500 mt-0.5"><%= current %> / <%= max %> connections</div>
+            </div>
+          </div>
         <% end %>
       </div>
     </div>
-    <div class="flex-1 space-y-2">
-      <% summary.select { |row| row.key?(:databases_details) }.first[:databases_details].each do |db| %>
-        <div class="flex items-center gap-2 text-sm">
-          <span class="font-medium text-gray-900 w-24 truncate"><%= db["name"] %></span>
-          <div class="flex-1">
-            <% current = db["current_connections"].to_i %>
-            <% max = db["max_connections"].to_i %>
-            <% pct = max > 0 ? (current.to_f / max * 100).round : 0 %>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-              <div class="bg-green-500 h-2.5 rounded-full" style="width: <%= pct %>%"></div>
-            </div>
-            <div class="text-xs text-gray-500 mt-0.5"><%= current %> / <%= max %> connections</div>
-          </div>
-        </div>
+    <div class="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
+      <% if health[:waiting_clients].positive? %>
+        <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-200 ring-inset"><%= pluralize(health[:waiting_clients], "client") %> waiting</span>
+      <% elsif health[:max_utilization] >= 80 %>
+        <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800 ring-1 ring-amber-300 ring-inset"><%= health[:max_utilization] %>% utilized</span>
+      <% else %>
+        <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">Healthy</span>
       <% end %>
+      <span class="text-xs text-gray-400">Last refresh: <%= Time.now.strftime("%H:%M:%S %Z") %></span>
     </div>
   </div>
-  <div class="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
-    <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">Online</span>
-    <span class="text-xs text-gray-400">Last refresh: <%= Time.now.strftime("%H:%M:%S %Z") %></span>
-  </div>
 <% else %>
-  <div class="px-4 py-6 text-center">
+  <% health = fleet_health(nil) %>
+  <div class="px-4 py-6 text-center" data-fleet-health data-status="<%= health[:status] %>" data-severity="<%= health[:severity] %>" data-waiting-clients="0" data-high-utilization="false">
     <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/20 ring-inset">Offline</span>
   </div>
 <% end %>

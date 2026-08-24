@@ -6,7 +6,9 @@ class EngineTest < ActionDispatch::IntegrationTest
     get "/pgbouncerhero"
 
     assert_response :success
-    assert_select "h2", "Overview"
+    assert_select "h2", "Fleet health"
+    assert_select "[data-controller~='fleet']", count: 1
+    assert_select "[data-fleet-target='offline']", text: "—", count: 1
     assert_select "turbo-frame", count: 1
   end
 
@@ -99,6 +101,44 @@ class EngineTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_select "span", text: "2 waiting clients", count: 1
+    end
+  end
+
+  def test_overview_exposes_waiting_health_to_fleet_summary
+    with_stubbed_database_methods({ summary: overview_summary(2) }) do
+      get "/pgbouncerhero/operations/primary/summary"
+
+      assert_response :success
+      assert_select "[data-fleet-health][data-status='waiting'][data-severity='2']", count: 1
+      assert_select "[data-waiting-clients='2'][data-high-utilization='false']", count: 1
+    end
+  end
+
+  def test_overview_exposes_high_utilization_to_fleet_summary
+    with_stubbed_database_methods({ summary: overview_summary(0, current_connections: 9) }) do
+      get "/pgbouncerhero/operations/primary/summary"
+
+      assert_response :success
+      assert_select "[data-fleet-health][data-status='high_utilization'][data-severity='1']", count: 1
+      assert_select "span", text: "90% utilized", count: 1
+    end
+  end
+
+  def test_overview_exposes_offline_health_to_fleet_summary
+    with_config(<<~YAML) do
+      pgbouncers:
+        Operations:
+          Primary: {}
+    YAML
+      get "/pgbouncerhero/operations/primary/summary"
+
+      assert_response :success
+      assert_select "[data-fleet-health][data-status='offline'][data-severity='3']", count: 1
+
+      get "/pgbouncerhero"
+
+      assert_response :success
+      assert_select "[role='alert']", text: /does not look online/, count: 0
     end
   end
 
@@ -359,12 +399,12 @@ class EngineTest < ActionDispatch::IntegrationTest
     end
   end
 
-  def overview_summary(waiting_clients)
+  def overview_summary(waiting_clients, current_connections: 0)
     [
       { "list" => "users", "items" => "1" },
       { "list" => "databases", "items" => "2" },
       { "list" => "pools", "items" => "1" },
-      { databases_details: [ { "name" => "app", "current_connections" => "0", "max_connections" => "10" } ] },
+      { databases_details: [ { "name" => "app", "current_connections" => current_connections.to_s, "max_connections" => "10" } ] },
       { pools_details: [ { "cl_waiting" => waiting_clients.to_s } ] }
     ]
   end

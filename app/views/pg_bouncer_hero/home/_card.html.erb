@@ -10,7 +10,7 @@
       <% end %>
     </div>
   <% end %>
-  <turbo-frame id="card_<%= database.group.name.parameterize %>_<%= database.name.parameterize %>" src="<%= summary_path(group: database.group.name.parameterize, database: database.name.parameterize) %>" loading="lazy">
+  <turbo-frame id="card_<%= database.group.name.parameterize %>_<%= database.name.parameterize %>" src="<%= summary_path(group: database.group.name.parameterize, database: database.name.parameterize) %>">
     <%= render partial: "card_loading_content" %>
   </turbo-frame>
 </div>

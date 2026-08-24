@@ -33,4 +33,41 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_includes result, "s"
     assert_includes result, "ms"
   end
+
+  def test_fleet_health_marks_missing_summary_offline
+    assert_equal "offline", fleet_health(nil).fetch(:status)
+    assert_equal 3, fleet_health(nil).fetch(:severity)
+  end
+
+  def test_fleet_health_prioritizes_waiting_clients
+    health = fleet_health(summary(waiting: 3, current: 9, maximum: 10))
+
+    assert_equal "waiting", health.fetch(:status)
+    assert_equal 2, health.fetch(:severity)
+    assert_equal 3, health.fetch(:waiting_clients)
+    assert_equal 90, health.fetch(:max_utilization)
+  end
+
+  def test_fleet_health_marks_high_utilization
+    health = fleet_health(summary(waiting: 0, current: 8, maximum: 10))
+
+    assert_equal "high_utilization", health.fetch(:status)
+    assert_equal 1, health.fetch(:severity)
+  end
+
+  def test_fleet_health_marks_normal_utilization_healthy
+    health = fleet_health(summary(waiting: 0, current: 7, maximum: 10))
+
+    assert_equal "healthy", health.fetch(:status)
+    assert_equal 0, health.fetch(:severity)
+  end
+
+  private
+
+  def summary(waiting:, current:, maximum:)
+    [
+      { pools_details: [ { "cl_waiting" => waiting.to_s } ] },
+      { databases_details: [ { "current_connections" => current.to_s, "max_connections" => maximum.to_s } ] }
+    ]
+  end
 end

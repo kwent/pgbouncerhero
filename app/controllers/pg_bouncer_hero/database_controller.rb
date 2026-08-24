@@ -8,11 +8,6 @@ module PgBouncerHero
     before_action :set_admin_state, only: MONITORING_ACTIONS
 
     def summary
-      if @database.connection
-        @dbs = @database.summary
-      else
-        flash[:error] = "#{@database.name} does not look online."
-      end
     end
 
     def databases

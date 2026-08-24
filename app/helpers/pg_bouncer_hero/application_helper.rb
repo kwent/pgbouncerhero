@@ -32,6 +32,28 @@ module PgBouncerHero
       }.compact.reverse.join(" ")
     end
 
+    def fleet_health(summary)
+      return { status: "offline", severity: 3, waiting_clients: 0, max_utilization: 0 } unless summary
+
+      pools = summary_details(summary, :pools_details)
+      databases = summary_details(summary, :databases_details)
+      waiting_clients = pools.sum { |pool| pool["cl_waiting"].to_i }
+      max_utilization = databases.filter_map do |database|
+        maximum = database["max_connections"].to_i
+        (database["current_connections"].to_f / maximum * 100).round if maximum.positive?
+      end.max.to_i
+
+      status, severity = if waiting_clients.positive?
+        [ "waiting", 2 ]
+      elsif max_utilization >= 80
+        [ "high_utilization", 1 ]
+      else
+        [ "healthy", 0 ]
+      end
+
+      { status: status, severity: severity, waiting_clients: waiting_clients, max_utilization: max_utilization }
+    end
+
     def monitoring_panel(&block)
       frame_id = "monitoring_#{params[:action]}"
 
@@ -49,6 +71,11 @@ module PgBouncerHero
     end
 
     private
+
+    def summary_details(summary, key)
+      row = summary.find { |item| item.key?(key) || item.key?(key.to_s) }
+      Array(row && (row[key] || row[key.to_s]))
+    end
 
     def monitoring_refresh_controls
       content_tag(:div, class: "flex items-center justify-between gap-2 mb-3") do

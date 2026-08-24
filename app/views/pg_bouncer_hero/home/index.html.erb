@@ -1,18 +1,38 @@
-<div class="bg-white rounded-lg border border-gray-200 shadow-xs mb-6">
-  <div class="px-4 py-3 border-b border-gray-200">
-    <h2 class="text-lg font-semibold text-gray-900">Overview</h2>
+<div data-controller="fleet polling" data-polling-interval-value="60000" data-fleet-total-value="<%= @groups.values.sum { |group| group.databases.size } %>" data-action="turbo:frame-load->fleet#refresh turbo:frame-load->polling#refreshed">
+  <div class="bg-white rounded-lg border border-gray-200 shadow-xs mb-6">
+    <div class="px-4 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Fleet health</h2>
+        <p class="text-sm text-gray-500" data-fleet-target="headline" aria-live="polite">Checking <%= pluralize(@groups.values.sum { |group| group.databases.size }, "instance") %>…</p>
+      </div>
+      <span class="text-xs text-gray-400" data-polling-target="status">Loading current status…</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-200">
+      <div class="px-4 py-3">
+        <div class="text-xs font-medium uppercase tracking-wider text-gray-500">Offline</div>
+        <div class="text-xl font-semibold text-red-700" data-fleet-target="offline">—</div>
+      </div>
+      <div class="px-4 py-3">
+        <div class="text-xs font-medium uppercase tracking-wider text-gray-500">Waiting clients</div>
+        <div class="text-xl font-semibold text-yellow-800" data-fleet-target="waiting">—</div>
+      </div>
+      <div class="px-4 py-3">
+        <div class="text-xs font-medium uppercase tracking-wider text-gray-500">High utilization</div>
+        <div class="text-xl font-semibold text-amber-800" data-fleet-target="utilization">—</div>
+      </div>
+    </div>
   </div>
-</div>
 
-<div data-controller="polling" data-polling-interval-value="60000">
   <% @groups.each do |_, group| %>
     <div class="mb-8">
       <h3 class="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
         <%= group.name %>
       </h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <% group.databases.each do |database| %>
-          <%= render partial: "card", locals: { database: database } %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-fleet-target="group">
+        <% group.databases.each_with_index do |database, index| %>
+          <div data-fleet-target="item" data-fleet-original-index="<%= index %>">
+            <%= render partial: "card", locals: { database: database } %>
+          </div>
         <% end %>
       </div>
     </div>

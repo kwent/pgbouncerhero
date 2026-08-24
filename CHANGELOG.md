@@ -3,6 +3,7 @@
 **New:**
 - Servers and Users monitoring views for PgBouncer connection and user limits
 - Waiting-client pressure indicators on overview cards from pool `cl_waiting` counts
+- Fleet health summary that prioritizes offline, waiting, and highly utilized PgBouncer instances
 - Database-scoped Pause, Reconnect, Wait close, and Resume maintenance controls
 
 **Improved:**
