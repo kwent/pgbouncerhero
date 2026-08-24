@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 3.1.0 - 2026-08-23
+
 **New:**
 - Read-only mode for hiding and server-side blocking PgBouncer administrative commands
 - PgBouncer state visibility and Resume controls
