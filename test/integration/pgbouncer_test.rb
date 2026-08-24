@@ -9,7 +9,7 @@ class PgBouncerIntegrationTest < Minitest::Test
   def setup
     config = {
       "integration" => {
-        "primary" => { "url" => URL }
+        "primary" => { "url" => URL, "pool_size" => 1, "pool_timeout" => 0.1 }
       }
     }
     @database = PgBouncerHero::Group.new("integration", config).databases.first
@@ -20,7 +20,7 @@ class PgBouncerIntegrationTest < Minitest::Test
   end
 
   def test_connects_to_the_pgbouncer_admin_console
-    result = @database.connection.exec("SHOW VERSION")
+    result = @database.with_connection { |connection| connection.exec("SHOW VERSION") }
 
     assert_match(/\APgBouncer \d+\.\d+\.\d+/, result.first.fetch("version"))
     assert_equal PG::CONNECTION_OK, @database.connection.status
@@ -51,13 +51,42 @@ class PgBouncerIntegrationTest < Minitest::Test
   end
 
   def test_reconnects_after_the_connection_is_finished
-    original = @database.connection
+    original = @database.with_connection { |connection| connection }
     original.finish
 
-    replacement = @database.connection
+    replacement = @database.with_connection { |connection| connection }
 
     refute_same original, replacement
     assert_equal PG::CONNECTION_OK, replacement.status
+  end
+
+  def test_checks_out_multiple_real_connections_concurrently
+    config = {
+      "integration" => {
+        "pooled" => { "url" => URL, "pool_size" => 2, "pool_timeout" => 0.1 }
+      }
+    }
+    database = PgBouncerHero::Group.new("integration", config).databases.first
+    checked_out = Queue.new
+    release = Queue.new
+    threads = 2.times.map do
+      Thread.new do
+        database.with_connection do |connection|
+          checked_out << connection.object_id
+          release.pop
+        end
+      end
+    end
+
+    connection_ids = 2.times.map { checked_out.pop }
+    2.times { release << true }
+    threads.each(&:join)
+
+    assert_equal 2, connection_ids.uniq.size
+  ensure
+    2.times { release&.push(true) }
+    threads&.each(&:join)
+    database&.disconnect!
   end
 
   def test_reload_keeps_the_admin_console_available
@@ -70,7 +99,7 @@ class PgBouncerIntegrationTest < Minitest::Test
   def test_rejects_invalid_credentials
     invalid_url = URI(URL).dup
     invalid_url.password = "incorrect"
-    config = { "integration" => { "invalid" => { "url" => invalid_url.to_s } } }
+    config = { "integration" => { "invalid" => { "url" => invalid_url.to_s, "pool_size" => 1 } } }
     database = PgBouncerHero::Group.new("integration", config).databases.first
 
     assert_nil database.connection

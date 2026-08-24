@@ -3,6 +3,8 @@ pgbouncers:
     primary:
       # eg. postgres://user:password@host:port/pgbouncer
       # url: <%%= ENV["PGBOUNCER_PRODUCTION_PRIMARY_DATABASE_URL"] %>
+      # pool_size: 5
+      # pool_timeout: 5
     # Add more databases
     # replica:
     #   url: <%%= ENV["PGBOUNCER_PRODUCTION_REPLICA_DATABASE_URL"] %>

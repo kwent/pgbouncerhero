@@ -1,84 +1,74 @@
 require "test_helper"
 
 class DatabaseTest < Minitest::Test
-  FakeConnection = Struct.new(:status, :finished, :finish_calls, :queries) do
-    def initialize(status: PG::CONNECTION_OK, finished: false)
-      super(status, finished, 0, [])
+  class FakeConnection
+    attr_reader :finish_calls, :queries
+
+    def initialize(tracker: nil)
+      @tracker = tracker
+      @finish_calls = 0
+      @queries = []
+      @finished = false
+    end
+
+    def status
+      PG::CONNECTION_OK
     end
 
     def finished?
-      finished
+      @finished
     end
 
     def finish
-      self.finish_calls += 1
-      self.finished = true
+      @finish_calls += 1
+      @finished = true
     end
 
     def exec(query)
-      queries << query
+      @tracker&.enter
+      sleep 0.02 if @tracker
+      @queries << query
       []
+    ensure
+      @tracker&.leave
     end
   end
 
-  class ConcurrentConnection < FakeConnection
+  class ConcurrencyTracker
     attr_reader :max_active
 
     def initialize
-      super
       @active = 0
       @max_active = 0
-      @activity_lock = Mutex.new
+      @lock = Mutex.new
     end
 
-    def exec(query)
-      @activity_lock.synchronize do
+    def enter
+      @lock.synchronize do
         @active += 1
         @max_active = [ @max_active, @active ].max
       end
-      sleep 0.01
-      super
-    ensure
-      @activity_lock.synchronize { @active -= 1 }
+    end
+
+    def leave
+      @lock.synchronize { @active -= 1 }
     end
   end
 
   def setup
-    config = {
-      "test_group" => {
-        "primary" => {
-          "url" => "postgres://user:pass@localhost:6432/pgbouncer"
-        }
-      }
-    }
-    @group = PgBouncerHero::Group.new("test_group", config)
-    @database = @group.databases.first
+    @database = build_database
   end
 
-  def test_database_name
+  def test_database_attributes
     assert_equal "primary", @database.name
-  end
-
-  def test_database_host
     assert_equal "localhost", @database.host
-  end
-
-  def test_database_port
     assert_equal 6432, @database.port
-  end
-
-  def test_database_user
     assert_equal "user", @database.user
-  end
-
-  def test_database_dbname
     assert_equal "pgbouncer", @database.dbname
   end
 
   def test_database_with_nil_url
-    config = { "test_group" => { "primary" => {} } }
-    group = PgBouncerHero::Group.new("test_group", config)
-    database = group.databases.first
+    database = build_database({})
 
     assert_nil database.host
     assert_nil database.port
@@ -86,91 +76,168 @@ class DatabaseTest < Minitest::Test
   end
 
   def test_database_with_nil_config
-    config = { "test_group" => { "primary" => nil } }
-    group = PgBouncerHero::Group.new("test_group", config)
-    database = group.databases.first
+    database = build_database(nil)
 
     assert_nil database.host
     assert_nil database.connection
   end
 
   def test_database_with_empty_url
-    config = { "test_group" => { "primary" => { "url" => "" } } }
-    group = PgBouncerHero::Group.new("test_group", config)
-    database = group.databases.first
+    database = build_database("url" => "")
 
     assert_nil database.host
     assert_nil database.port
     assert_nil database.connection
   end
 
-  def test_connection_reuses_a_valid_connection
-    connection = FakeConnection.new
-    @database.instance_variable_set(:@connection, connection)
+  def test_pool_settings_use_database_config
+    database = build_database("pool_size" => 3, "pool_timeout" => 0.25)
 
-    assert_same connection, @database.connection
+    assert_equal 3, database.pool_size
+    assert_in_delta 0.25, database.pool_timeout
   end
 
-  def test_connection_replaces_a_connection_with_a_bad_status
-    stale_connection = FakeConnection.new(status: PG::CONNECTION_BAD)
-    replacement_connection = FakeConnection.new
-    @database.instance_variable_set(:@connection, stale_connection)
+  def test_pool_settings_must_be_positive
+    error = assert_raises(ArgumentError) { build_database("pool_size" => 0) }
 
-    stub_connection_model(replacement_connection)
-
-    assert_same replacement_connection, @database.connection
-    assert_predicate stale_connection, :finished?
-    assert_equal 1, stale_connection.finish_calls
+    assert_equal "pool_size must be greater than zero", error.message
   end
 
-  def test_connection_replaces_a_finished_connection
-    stale_connection = FakeConnection.new(finished: true)
-    replacement_connection = FakeConnection.new
-    @database.instance_variable_set(:@connection, stale_connection)
+  def test_pool_settings_use_environment_defaults
+    with_pool_environment("3", "0.25") do
+      database = build_database
 
-    stub_connection_model(replacement_connection)
-
-    assert_same replacement_connection, @database.connection
-    assert_equal 0, stale_connection.finish_calls
+      assert_equal 3, database.pool_size
+      assert_in_delta 0.25, database.pool_timeout
+    end
   end
 
-  def test_disconnect_closes_and_clears_the_connection
-    connection = FakeConnection.new
-    @database.instance_variable_set(:@connection, connection)
+  def test_database_pool_settings_override_the_environment
+    with_pool_environment("4", "0.5") do
+      database = build_database("pool_size" => 2, "pool_timeout" => 0.1)
 
-    @database.disconnect!
-
-    assert_predicate connection, :finished?
-    assert_nil @database.instance_variable_get(:@connection)
+      assert_equal 2, database.pool_size
+      assert_in_delta 0.1, database.pool_timeout
+    end
   end
 
-  def test_commands_execute_on_the_connection
-    connection = FakeConnection.new
-    @database.instance_variable_set(:@connection, connection)
+  def test_pool_timeout_must_be_finite
+    error = assert_raises(ArgumentError) { build_database("pool_timeout" => Float::INFINITY) }
 
-    @database.stats
-
-    assert_equal [ "SHOW stats" ], connection.queries
+    assert_equal "pool_timeout must be a finite number greater than zero", error.message
   end
 
-  def test_commands_are_serialized_per_database
-    connection = ConcurrentConnection.new
-    @database.instance_variable_set(:@connection, connection)
+  def test_connection_returns_a_connection_compatible_proxy
+    raw_connection = FakeConnection.new
+    stub_connection_model(@database) { raw_connection }
 
-    threads = 4.times.map { Thread.new { @database.stats } }
+    assert_equal PG::CONNECTION_OK, @database.connection.status
+  end
+
+  def test_with_connection_yields_a_raw_connection
+    raw_connection = FakeConnection.new
+    stub_connection_model(@database) { raw_connection }
+
+    yielded_connection = @database.with_connection { |connection| connection }
+
+    assert_same raw_connection, yielded_connection
+  end
+
+  def test_commands_reuse_idle_connections
+    connections = []
+    stub_connection_model(@database) { FakeConnection.new.tap { |connection| connections << connection } }
+
+    2.times { @database.stats }
+
+    assert_equal 1, connections.size
+    assert_equal [ "SHOW stats", "SHOW stats" ], connections.first.queries
+  end
+
+  def test_commands_run_concurrently_up_to_the_pool_size
+    tracker = ConcurrencyTracker.new
+    database = build_database("pool_size" => 2)
+    connections = []
+    stub_connection_model(database) do
+      FakeConnection.new(tracker: tracker).tap { |connection| connections << connection }
+    end
+
+    threads = 4.times.map { Thread.new { database.stats } }
     threads.each(&:join)
 
-    assert_equal 1, connection.max_active
-    assert_equal [ "SHOW stats" ] * 4, connection.queries
+    assert_equal 2, tracker.max_active
+    assert_equal 2, connections.size
+    assert_equal 4, connections.sum { |connection| connection.queries.size }
+  ensure
+    database&.disconnect!
+  end
+
+  def test_pool_timeout_returns_nil
+    database = build_database("pool_size" => 1, "pool_timeout" => 0.01)
+    stub_connection_model(database) { FakeConnection.new }
+    checked_out = Queue.new
+    release = Queue.new
+    holder = Thread.new do
+      database.with_connection do
+        checked_out << true
+        release.pop
+      end
+    end
+    checked_out.pop
+
+    assert_nil database.stats
+  ensure
+    release&.push(true)
+    holder&.join
+    database&.disconnect!
+  end
+
+  def test_disconnect_closes_every_initialized_connection
+    database = build_database("pool_size" => 2)
+    connections = []
+    stub_connection_model(database) { FakeConnection.new.tap { |connection| connections << connection } }
+    checked_out = Queue.new
+    release = Queue.new
+    holders = 2.times.map do
+      Thread.new do
+        database.with_connection do
+          checked_out << true
+          release.pop
+        end
+      end
+    end
+    2.times { checked_out.pop }
+    2.times { release << true }
+    holders.each(&:join)
+
+    database.disconnect!
+
+    assert_equal 2, connections.size
+    assert connections.all?(&:finished?)
   end
 
   private
 
-  def stub_connection_model(connection)
-    connection_model = Class.new do
-      define_method(:initialize) { |*| }
-      define_method(:connection) { connection }
+  def build_database(database_config = :default)
+    database_config = { "url" => "postgres://user:pass@localhost:6432/pgbouncer" } if database_config == :default
+    config = { "test_group" => { "primary" => database_config } }
+    PgBouncerHero::Group.new("test_group", config).databases.first
+  end
+
+  def stub_connection_model(database, &factory)
+    connection_model = Class.new(PgBouncerHero::Connection) do
+      define_method(:connect, &factory)
     end
-    @database.define_singleton_method(:connection_model) { connection_model }
+    database.define_singleton_method(:connection_model) { connection_model }
+  end
+
+  def with_pool_environment(size, timeout)
+    previous_size = ENV["PGBOUNCERHERO_POOL_SIZE"]
+    previous_timeout = ENV["PGBOUNCERHERO_POOL_TIMEOUT"]
+    ENV["PGBOUNCERHERO_POOL_SIZE"] = size
+    ENV["PGBOUNCERHERO_POOL_TIMEOUT"] = timeout
+    yield
+  ensure
+    ENV["PGBOUNCERHERO_POOL_SIZE"] = previous_size
+    ENV["PGBOUNCERHERO_POOL_TIMEOUT"] = previous_timeout
   end
 end
