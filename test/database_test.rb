@@ -1,9 +1,9 @@
 require "test_helper"
 
 class DatabaseTest < Minitest::Test
-  FakeConnection = Struct.new(:status, :finished, :finish_calls) do
+  FakeConnection = Struct.new(:status, :finished, :finish_calls, :queries) do
     def initialize(status: PG::CONNECTION_OK, finished: false)
-      super(status, finished, 0)
+      super(status, finished, 0, [])
     end
 
     def finished?
@@ -13,6 +13,33 @@ class DatabaseTest < Minitest::Test
     def finish
       self.finish_calls += 1
       self.finished = true
+    end
+
+    def exec(query)
+      queries << query
+      []
+    end
+  end
+
+  class ConcurrentConnection < FakeConnection
+    attr_reader :max_active
+
+    def initialize
+      super
+      @active = 0
+      @max_active = 0
+      @activity_lock = Mutex.new
+    end
+
+    def exec(query)
+      @activity_lock.synchronize do
+        @active += 1
+        @max_active = [ @max_active, @active ].max
+      end
+      sleep 0.01
+      super
+    ensure
+      @activity_lock.synchronize { @active -= 1 }
     end
   end
 
@@ -55,6 +82,15 @@ class DatabaseTest < Minitest::Test
 
     assert_nil database.host
     assert_nil database.port
+    assert_nil database.connection
+  end
+
+  def test_database_with_nil_config
+    config = { "test_group" => { "primary" => nil } }
+    group = PgBouncerHero::Group.new("test_group", config)
+    database = group.databases.first
+
+    assert_nil database.host
     assert_nil database.connection
   end
 
@@ -106,6 +142,26 @@ class DatabaseTest < Minitest::Test
 
     assert_predicate connection, :finished?
     assert_nil @database.instance_variable_get(:@connection)
+  end
+
+  def test_commands_execute_on_the_connection
+    connection = FakeConnection.new
+    @database.instance_variable_set(:@connection, connection)
+
+    @database.stats
+
+    assert_equal [ "SHOW stats" ], connection.queries
+  end
+
+  def test_commands_are_serialized_per_database
+    connection = ConcurrentConnection.new
+    @database.instance_variable_set(:@connection, connection)
+
+    threads = 4.times.map { Thread.new { @database.stats } }
+    threads.each(&:join)
+
+    assert_equal 1, connection.max_active
+    assert_equal [ "SHOW stats" ] * 4, connection.queries
   end
 
   private

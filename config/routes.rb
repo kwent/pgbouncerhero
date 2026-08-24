@@ -1,7 +1,13 @@
 PgBouncerHero::Engine.routes.draw do
+  group_exists = ->(request) { PgBouncerHero.groups.key?(request.params[:group]) }
+  database_exists = lambda do |request|
+    group = PgBouncerHero.groups[request.params[:group]]
+    group&.databases&.any? { |database| database.name.parameterize == request.params[:database] }
+  end
+
   root to: "home#index"
-  scope path: ":group", constraints: proc { |req| (PgBouncerHero.groups.keys.map(&:parameterize) + [ nil ]).include?(req.params[:group]) } do
-    scope path: ":database", constraints: proc { |req| (PgBouncerHero.groups[req.params[:group]].databases.map(&:name).map(&:parameterize) + [ nil ]).include?(req.params[:database]) } do
+  scope path: ":group", constraints: group_exists do
+    scope path: ":database", constraints: database_exists do
       get :summary, controller: :database
       get :databases, controller: :database
       get :stats, controller: :database

@@ -12,31 +12,31 @@ module PgBouncerHero
         end
       end
       def databases
-        connection.exec("SHOW databases")
+        execute("SHOW databases")
       end
       def stats
-        connection.exec("SHOW stats")
+        execute("SHOW stats")
       end
       def lists
-        connection.exec("SHOW lists")
+        execute("SHOW lists")
       end
       def pools
-        connection.exec("SHOW pools")
+        execute("SHOW pools")
       end
       def clients
-        connection.exec("SHOW clients")
+        execute("SHOW clients")
       end
       def conf
-        connection.exec("SHOW config")
+        execute("SHOW config")
       end
       def reload
-        connection.exec("RELOAD")
+        execute("RELOAD")
       end
       def suspend
-        connection.exec("SUSPEND")
+        execute("SUSPEND")
       end
       def shutdown
-        connection.exec("SHUTDOWN")
+        execute("SHUTDOWN")
       end
     end
   end

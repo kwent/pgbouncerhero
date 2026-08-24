@@ -18,15 +18,17 @@ Gem::Specification.new do |spec|
   spec.metadata = {
     "source_code_uri" => "https://github.com/kwent/pgbouncerhero",
     "changelog_uri" => "https://github.com/kwent/pgbouncerhero/blob/master/CHANGELOG.md",
+    "documentation_uri" => "https://github.com/kwent/pgbouncerhero#readme",
     "bug_tracker_uri" => "https://github.com/kwent/pgbouncerhero/issues",
     "rubygems_mfa_required" => "true"
   }
 
-  spec.add_dependency "railties", ">= 7.2"
-  spec.add_dependency "importmap-rails", ">= 1.2"
-  spec.add_dependency "turbo-rails", ">= 1.0"
-  spec.add_dependency "stimulus-rails", ">= 1.0"
-  spec.add_dependency "pg", ">= 1.2"
+  spec.add_dependency "railties", ">= 7.2", "< 9"
+  spec.add_dependency "propshaft", ">= 1.0", "< 2"
+  spec.add_dependency "importmap-rails", ">= 1.2", "< 3"
+  spec.add_dependency "turbo-rails", ">= 1.0", "< 3"
+  spec.add_dependency "stimulus-rails", ">= 1.0", "< 2"
+  spec.add_dependency "pg", ">= 1.2", "< 2"
 
   spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "tailwindcss-rails", "~> 4.0"

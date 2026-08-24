@@ -16,3 +16,5 @@ tmp
 *.a
 mkmf.log
 gemfiles/*.lock
+/.serena/
+/test/dummy/log/
