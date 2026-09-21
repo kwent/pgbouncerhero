@@ -38,5 +38,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop", "~> 1.0"
   spec.add_development_dependency "rubocop-rails-omakase", "~> 1.0"
   spec.add_development_dependency "herb", "~> 0.8"
-  spec.add_development_dependency "json", "< 3"
+  spec.add_development_dependency "json", "< 4"
 end
