@@ -1,5 +1,11 @@
 ## Unreleased
 
+## 3.3.0 - 2026-10-19
+
+**Improved:**
+- Support JSON 3 alongside JSON 2 in development and test environments
+- Refresh development dependencies, including pg 1.7.0 and RuboCop 1.92.0
+
 ## 3.2.0 - 2026-08-24
 
 **New:**
