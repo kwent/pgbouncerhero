@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/kwent/pgbouncerhero"
   spec.license       = "MIT"
 
-  spec.required_ruby_version = ">= 3.2"
+  spec.required_ruby_version = ">= 3.3"
 
   spec.files         = Dir["lib/**/*", "app/**/*", "config/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md"]
   spec.require_paths = [ "lib" ]

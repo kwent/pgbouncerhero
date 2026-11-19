@@ -12,7 +12,7 @@ A graphical user interface for your PgBouncers.
 
 ## Requirements
 
-- Ruby >= 3.2
+- Ruby >= 3.3
 - Rails >= 7.2
 - PgBouncer >= 1.23
 - Propshaft (asset pipeline)
