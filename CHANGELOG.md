@@ -1,5 +1,13 @@
 ## Unreleased
 
+## 4.0.0 - 2026-11-19
+
+**Breaking:**
+- Requires Ruby >= 3.3; Ruby 3.2 reached end of life on 2026-03-31
+
+**Improved:**
+- Develop against Ruby 3.4.13, which fixes the Regexp and String memory-safety bugs in the 2026-11-18 Ruby security advisory
+
 ## 3.3.0 - 2026-10-19
 
 **Improved:**
